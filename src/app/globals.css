@@ -1,26 +1,215 @@
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* 通用样式 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-width: 1000px;
+  margin: 0 auto;
+  font-size: 14px;
+  font-family: PingFang SC, Hiragino Sans GB, Microsoft YaHei UI, Microsoft YaHei, Source Han Sans CN, sans-serif;
+  background: #fff;
+  text-align: justify;
+  color: #010000;
+}
+
+a {
+  cursor: pointer;
+  color: mediumslateblue;
+  text-decoration: none;
+}
+
+ul {
+  list-style-type: none;
+}
+
+/* 主体容器 */
+.wrapin {
+  width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 头部 */
+header {
+  background: pink;
+  line-height: 60px;
+  padding: 0 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  font-size: 24px;
+  color: #fff;
+  font-weight: bold;
+  line-height: 60px;
+}
+
+header .nav {
+  display: flex;
+}
+
+header .nav li {
+  width: 120px;
+  text-align: center;
+  font-size: 16px;
+}
+
+header .nav li a {
+  color: #fff;
+  display: block;
+}
+
+header .nav li a:hover {
+  text-decoration: underline;
+}
+
+/* Banner */
+.banner {
+  display: block;
+}
+
+.banner img {
+  display: block;
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+/* 内容区域 */
+.in_com {
+  background: #f4f8ff;
+  padding: 15px;
+  display: block;
+}
+
+/* 顶部图文 */
+.con_top {
+  display: flex;
+  gap: 20px;
+}
+
+.con_top .pic {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.con_top .pic img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.con_top .text {
+  flex: 1;
+  line-height: 28px;
+  color: mediumturquoise;
+}
+
+/* 标题 */
+.title {
+  background: #598bd2;
+  line-height: 40px;
+  padding: 0 15px;
+  margin: 20px 0;
+}
+
+.title h2 {
+  font-size: 20px;
+  color: #fff;
+  font-weight: 500;
+}
+
+/* 文本内容 */
+.text_a {
+  line-height: 28px;
+  color: hotpink;
+}
+
+.text_a img {
+  margin-left: 15px;
+  float: right;
+  width: 200px;
+  height: auto;
+  object-fit: cover;
+}
+
+.text_a img.full {
+  margin-left: 0;
+  float: none;
+  display: block;
+  width: 100%;
+  margin-top: 15px;
+}
+
+/* 页脚 */
+footer {
+  background: pink;
+  line-height: 60px;
+  padding: 0 15px;
+  text-align: center;
+  font-size: 20px;
+  color: #fff;
+}
+
+footer a {
+  color: #fff;
+}
+
+/* 图片鉴赏 */
+.pic_con {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.pic_con li {
+  width: 33.333%;
+  padding: 15px;
+}
+
+.pic_con li img,
+.pic_con li video {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+/* 人物介绍 */
+.renwu_box li {
+  display: flex;
+  gap: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px dashed #ccc;
+  margin-bottom: 15px;
+}
+
+.renwu_box li .pic {
+  width: 260px;
+  height: 260px;
+  flex-shrink: 0;
+}
+
+.renwu_box li .pic img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.renwu_box li .text {
+  font-size: 16px;
+  line-height: 28px;
+  color: hotpink;
+}
+
+/* 清除浮动 */
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
 }
