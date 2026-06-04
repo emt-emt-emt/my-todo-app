@@ -16,10 +16,7 @@ export default function Tupian() {
       </header>
 
       <div className="banner">
-        <img
-          src="https://images.unsplash.com/photo-1541562232579-512a21360020?w=1000&h=300&fit=crop"
-          alt="图片鉴赏"
-        />
+        <img src="/images/emilia.jpg" alt="图片鉴赏" />
       </div>
 
       <div className="in_com">
@@ -27,51 +24,15 @@ export default function Tupian() {
           <h2>图片鉴赏</h2>
         </div>
         <ul className="pic_con clearfix">
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=400&h=240&fit=crop" />
-            </div>
-          </li>
-          <li>
-            <div className="box">
-              <img src="https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=400&h=240&fit=crop" />
-            </div>
-          </li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="图片1" /></div></li>
+          <li><div className="box"><img src="/images/character2.jpg" alt="图片2" /></div></li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="图片3" /></div></li>
+          <li><div className="box"><img src="/images/character2.jpg" alt="图片4" /></div></li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="图片5" /></div></li>
+          <li><div className="box"><img src="/images/character2.jpg" alt="图片6" /></div></li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="图片7" /></div></li>
+          <li><div className="box"><img src="/images/character2.jpg" alt="图片8" /></div></li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="图片9" /></div></li>
         </ul>
       </div>
 

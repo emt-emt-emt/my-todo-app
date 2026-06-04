@@ -16,10 +16,7 @@ export default function Renwu() {
       </header>
 
       <div className="banner">
-        <img
-          src="https://images.unsplash.com/photo-1541562232579-512a21360020?w=1000&h=300&fit=crop"
-          alt="人物介绍"
-        />
+        <img src="/images/character2.jpg" alt="人物介绍" />
       </div>
 
       <div className="in_com">
@@ -29,7 +26,7 @@ export default function Renwu() {
         <ul className="renwu_box">
           <li>
             <div className="pic">
-              <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=260&h=260&fit=crop" alt="菜月昴" />
+              <img src="/images/emilia.jpg" alt="菜月昴" />
             </div>
             <div className="text">
               <p><b>菜月昴</b><br />
@@ -40,7 +37,7 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=260&h=260&fit=crop" alt="爱蜜莉雅" />
+              <img src="/images/character2.jpg" alt="爱蜜莉雅" />
             </div>
             <div className="text">
               <b>爱蜜莉雅</b><br />
@@ -50,7 +47,7 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=260&h=260&fit=crop" alt="雷姆" />
+              <img src="/images/emilia.jpg" alt="雷姆" />
             </div>
             <div className="text">
               <b>雷姆</b><br />
@@ -60,7 +57,7 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=260&h=260&fit=crop" alt="拉姆" />
+              <img src="/images/character2.jpg" alt="拉姆" />
             </div>
             <div className="text">
               <b>拉姆</b><br />
@@ -70,7 +67,7 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=260&h=260&fit=crop" alt="帕克" />
+              <img src="/images/emilia.jpg" alt="帕克" />
             </div>
             <div className="text">
               <b>帕克</b><br />
