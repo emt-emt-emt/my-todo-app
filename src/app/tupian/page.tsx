@@ -24,15 +24,15 @@ export default function Tupian() {
           <h2>图片鉴赏</h2>
         </div>
         <ul className="pic_con clearfix">
-          <li><div className="box"><img src="/images/emilia.jpg" alt="图片1" /></div></li>
-          <li><div className="box"><img src="/images/character2.jpg" alt="图片2" /></div></li>
-          <li><div className="box"><img src="/images/emilia.jpg" alt="图片3" /></div></li>
-          <li><div className="box"><img src="/images/character2.jpg" alt="图片4" /></div></li>
-          <li><div className="box"><img src="/images/emilia.jpg" alt="图片5" /></div></li>
-          <li><div className="box"><img src="/images/character2.jpg" alt="图片6" /></div></li>
-          <li><div className="box"><img src="/images/emilia.jpg" alt="图片7" /></div></li>
-          <li><div className="box"><img src="/images/character2.jpg" alt="图片8" /></div></li>
-          <li><div className="box"><img src="/images/emilia.jpg" alt="图片9" /></div></li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="爱蜜莉雅1" /></div></li>
+          <li><div className="box"><img src="/images/character2.jpg" alt="角色2" /></div></li>
+          <li><div className="box"><img src="/images/emilia2.jpg" alt="爱蜜莉雅2" /></div></li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="爱蜜莉雅3" /></div></li>
+          <li><div className="box"><img src="/images/character2.jpg" alt="角色4" /></div></li>
+          <li><div className="box"><img src="/images/emilia2.jpg" alt="爱蜜莉雅5" /></div></li>
+          <li><div className="box"><img src="/images/emilia.jpg" alt="爱蜜莉雅6" /></div></li>
+          <li><div className="box"><img src="/images/character2.jpg" alt="角色7" /></div></li>
+          <li><div className="box"><img src="/images/emilia2.jpg" alt="爱蜜莉雅8" /></div></li>
         </ul>
       </div>
 
