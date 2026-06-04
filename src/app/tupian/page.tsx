@@ -32,7 +32,7 @@ export default function Tupian() {
           <li><div className="box"><img src="/images/character6.jpg" alt="角色6" /></div></li>
           <li><div className="box"><img src="/images/character7.jpg" alt="角色7" /></div></li>
           <li><div className="box"><img src="/images/character8.jpg" alt="角色8" /></div></li>
-          <li><div className="box"><img src="/images/emilia.jpg" alt="爱蜜莉雅3" /></div></li>
+          <li><div className="box"><img src="/images/character9.jpg" alt="角色9" /></div></li>
         </ul>
       </div>
 
