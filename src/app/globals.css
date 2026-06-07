@@ -182,29 +182,158 @@ footer a {
 
 /* 人物介绍 */
 .renwu_box li {
-  display: flex;
-  gap: 20px;
   padding-bottom: 15px;
   border-bottom: 1px dashed #ccc;
   margin-bottom: 15px;
+}
+
+.renwu_box li .card_link {
+  display: flex;
+  gap: 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.renwu_box li .card_link:hover .pic img {
+  transform: scale(1.03);
 }
 
 .renwu_box li .pic {
   width: 260px;
   height: 260px;
   flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 4px;
 }
 
 .renwu_box li .pic img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
 }
 
 .renwu_box li .text {
   font-size: 16px;
   line-height: 28px;
   color: hotpink;
+  flex: 1;
+}
+
+.renwu_box li .text .more {
+  color: #598bd2;
+  font-weight: bold;
+}
+
+/* 角色详情页 */
+.char_detail {
+  display: flex;
+  gap: 20px;
+}
+
+.char_info {
+  width: 320px;
+  flex-shrink: 0;
+}
+
+.char_info .info_pic {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.char_info .info_pic img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 4px;
+  display: block;
+}
+
+.char_info .info_table {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+}
+
+.char_info .info_table h3 {
+  font-size: 18px;
+  color: #598bd2;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #598bd2;
+  padding-bottom: 5px;
+}
+
+.char_info .info_table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.char_info .info_table th {
+  text-align: left;
+  padding: 8px 5px;
+  color: #333;
+  font-weight: bold;
+  width: 35%;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.char_info .info_table td {
+  padding: 8px 5px;
+  color: #555;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+
+.char_info .info_table tr:last-child th,
+.char_info .info_table tr:last-child td {
+  border-bottom: none;
+}
+
+.char_main {
+  flex: 1;
+}
+
+.char_main .intro,
+.char_main .section {
+  background: #fff;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 15px;
+  line-height: 28px;
+  color: #333;
+}
+
+.char_main .intro h3,
+.char_main .section h3 {
+  font-size: 18px;
+  color: #598bd2;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #598bd2;
+  padding-bottom: 5px;
+}
+
+.char_main .intro p,
+.char_main .section p {
+  margin-bottom: 10px;
+  text-indent: 2em;
+}
+
+.char_main .back {
+  margin-top: 20px;
+  padding: 15px 0;
+}
+
+.char_main .back a {
+  color: #598bd2;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.char_main .back a:hover {
+  text-decoration: underline;
 }
 
 /* 清除浮动 */

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { characters } from "./data";
 
 export default function Renwu() {
   return (
@@ -24,67 +25,21 @@ export default function Renwu() {
           <h2>人物介绍</h2>
         </div>
         <ul className="renwu_box">
-          <li>
-            <div className="pic">
-              <img src="/images/subaru.png" alt="菜月昴" />
-            </div>
-            <div className="text">
-              <p><b>菜月昴</b><br />
-                动画《Re:从零开始的异世界生活》的男主角<br />
-              </p>
-              <p>住在现代日本的普通高中生，在从便利店回家的路上突然被召唤到异世界。没有特殊能力，只有"死亡回归"的能力——死亡后时间会回溯到某个存档点。性格乐观但内心脆弱，在经历无数次死亡后逐渐坚强。深爱着爱蜜莉雅，愿意为她无数次死亡和重生。</p>
-            </div>
-          </li>
-          <li>
-            <div className="pic">
-              <img src="/images/emilia.jpg" alt="爱蜜莉雅" />
-            </div>
-            <div className="text">
-              <b>爱蜜莉雅</b><br />
-              动画《Re:从零开始的异世界生活》的女主角。<br />
-              银发半精灵少女，外貌酷似传说中的嫉妒魔女莎缇拉，因此受到人们的歧视和恐惧。性格善良温柔，内心坚强。与精灵帕克缔结契约，在王选中被推举为候选人。是菜月昴来到异世界后第一个帮助他的人，也是昴深爱的对象。
-            </div>
-          </li>
-          <li>
-            <div className="pic">
-              <img src="/images/rem.png" alt="雷姆" />
-            </div>
-            <div className="text">
-              <b>雷姆</b><br />
-              罗兹瓦尔宅邸的女仆，拉姆的妹妹。<br />
-              蓝发蓝眼的鬼族少女，拥有鬼族强大的战斗力。由于小时候姐姐拉姆为了保护她而失去力量，所以对姐姐怀有愧疚和感激之情。在昴经历多次死亡后，逐渐被昴的坚强和温柔打动，深爱着昴。是作品中人气极高的角色。
-            </div>
-          </li>
-          <li>
-            <div className="pic">
-              <img src="/images/ram.png" alt="拉姆" />
-            </div>
-            <div className="text">
-              <b>拉姆</b><br />
-                  罗兹瓦尔宅邸的女仆，雷姆的姐姐。<br />
-                  粉发粉眼的鬼族少女，曾经拥有强大的力量，但在保护妹妹雷姆时失去了角和大部分力量。性格傲娇毒舌，但内心关心妹妹和昴。虽然失去了战斗力，但凭借丰富的经验和敏锐的观察力辅助昴和罗兹瓦尔。
-            </div>
-          </li>
-          <li>
-            <div className="pic">
-              <img src="/images/puck.png" alt="帕克" />
-            </div>
-            <div className="text">
-              <b>帕克</b><br />
-                  爱蜜莉雅缔结契约的精灵，被称为"永久冻土的终焉之兽"。<br />
-                  平时以可爱的猫型精灵形态出现，与爱蜜莉雅关系亲密如父女。真实形态是巨大而强大的冰之兽，拥有毁灭世界的力量。性格温和友善，但非常保护爱蜜莉雅，不允许任何人伤害她。
-            </div>
-          </li>
-          <li>
-            <div className="pic">
-              <img src="/images/reinhard.png" alt="莱茵哈鲁特" />
-            </div>
-            <div className="text">
-              <b>莱茵哈鲁特·范·阿斯特雷亚</b><br />
-              王国骑士团所属的近卫骑士，被称为"剑圣"。<br />
-              拥有剑圣的加护，是当代最强的剑士。出身于剑圣世家阿斯特雷亚家，继承了代代相传的龙剑雷德。性格正直善良，正义感极强，深受王国民众的爱戴。与菲鲁特关系亲密，在王选中支持菲鲁特成为国王候选人。虽然拥有压倒性的实力，但从不傲慢，对所有人都保持谦逊的态度。
-            </div>
-          </li>
+          {characters.map((char) => (
+            <li key={char.id}>
+              <Link href={`/renwu/${char.id}`} className="card_link">
+                <div className="pic">
+                  <img src={char.image} alt={char.name} />
+                </div>
+                <div className="text">
+                  <p><b>{char.name}</b><br />
+                    {char.intro.substring(0, 80)}...<br />
+                  </p>
+                  <p><span className="more">点击查看详情 →</span></p>
+                </div>
+              </Link>
+            </li>
+          ))}
         </ul>
       </div>
 
