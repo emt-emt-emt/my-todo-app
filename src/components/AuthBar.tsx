@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useAuth } from "./AuthProvider";
 
 export function AuthBar() {
@@ -41,9 +42,21 @@ export function AuthBar() {
     <div style={{ display: "inline-flex", alignItems: "center", gap: 10 }}>
       {user ? (
         <>
-          <span style={{ color: "#fff" }}>
-            👤 {user.username} {user.role === "admin" && "(管理员)"}
-          </span>
+          <Link
+            href="/settings"
+            style={{ color: "#fff", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}
+          >
+            {user.avatar ? (
+              <img
+                src={user.avatar}
+                alt="avatar"
+                style={{ width: 28, height: 28, borderRadius: "50%", objectFit: "cover", border: "1px solid #fff" }}
+              />
+            ) : (
+              <span style={{ fontSize: 20 }}>👤</span>
+            )}
+            <span>{user.username} {user.role === "admin" && "(管理员)"}</span>
+          </Link>
           <button
             onClick={logout}
             style={{
@@ -142,9 +155,6 @@ export function AuthBar() {
               >
                 {isLogin ? "去注册" : "去登录"}
               </button>
-            </p>
-            <p style={{ marginTop: 5, textAlign: "center", fontSize: 11, color: "#999" }}>
-              管理员默认账号: admin / admin123
             </p>
           </div>
         </div>

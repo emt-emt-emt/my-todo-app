@@ -24,6 +24,7 @@ async function initPg() {
     password VARCHAR(255) NOT NULL,
     role VARCHAR(10) DEFAULT 'user',
     banned BOOLEAN DEFAULT FALSE,
+    avatar TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`;
 
@@ -118,6 +119,7 @@ function initMemory() {
       password: "$2b$10$1tyv7b4fYxe8amh1VzbsOuOfrusFPZFsYUWcbJZGswgv9bSx.mVvG",
       role: "admin",
       banned: false,
+      avatar: undefined,
       createdAt: new Date().toISOString(),
     },
   ];
@@ -146,6 +148,7 @@ export interface User {
   role: "admin" | "user";
   banned: boolean;
   createdAt: string;
+  avatar?: string;
 }
 export interface Comment {
   id: number;
@@ -194,6 +197,7 @@ function mapUser(r: any): User {
     password: r.password,
     role: r.role,
     banned: r.banned,
+    avatar: r.avatar,
     createdAt: r.created_at || r.createdAt,
   };
 }
