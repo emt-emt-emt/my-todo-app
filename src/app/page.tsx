@@ -1,27 +1,10 @@
 import Link from "next/link";
+import { Header } from "../components/Header";
 
 export default function Home() {
   return (
     <div className="wrapin">
-      {/* 顶部 */}
-      <header className="clearfix">
-        <Link href="/" className="logo">
-          从零开始的异世界生活
-        </Link>
-        <ul className="nav">
-          <li>
-            <Link href="/">
-              <strong>首页</strong>
-            </Link>
-          </li>
-          <li>
-            <Link href="/renwu">人物介绍</Link>
-          </li>
-          <li>
-            <Link href="/tupian">图片鉴赏</Link>
-          </li>
-        </ul>
-      </header>
+      <Header active="home" />
 
       <div className="banner">
         <img src="/images/emilia.jpg" alt="从零开始的异世界生活" />

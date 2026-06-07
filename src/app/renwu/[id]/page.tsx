@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { Header } from "../../../components/Header";
 import { notFound } from "next/navigation";
 import { getCharacter, characters } from "../data";
+import { CommentSection } from "../../../components/CommentSection";
 
 export function generateStaticParams() {
   return characters.map((char) => ({ id: char.id }));
@@ -20,16 +22,7 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
 
   return (
     <div className="wrapin">
-      <header className="clearfix">
-        <Link href="/" className="logo">
-          从零开始的异世界生活
-        </Link>
-        <ul className="nav">
-          <li><Link href="/">首页</Link></li>
-          <li><Link href="/renwu"><strong>人物介绍</strong></Link></li>
-          <li><Link href="/tupian">图片鉴赏</Link></li>
-        </ul>
-      </header>
+      <Header active="renwu" />
 
       <div className="banner">
         <img src={char.image} alt={char.name} />
@@ -91,6 +84,8 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
             </div>
           </div>
         </div>
+
+        <CommentSection characterId={id} />
       </div>
 
       <footer>

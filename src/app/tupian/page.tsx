@@ -1,19 +1,10 @@
-import Link from "next/link";
+import { Header } from "../../components/Header";
+import { ImageGallery } from "../../components/ImageGallery";
 
 export default function Tupian() {
   return (
     <div className="wrapin">
-      {/* 顶部 */}
-      <header className="clearfix">
-        <Link href="/" className="logo">
-          从零开始的异世界生活
-        </Link>
-        <ul className="nav">
-          <li><Link href="/">首页</Link></li>
-          <li><Link href="/renwu">人物介绍</Link></li>
-          <li><Link href="/tupian"><strong>图片鉴赏</strong></Link></li>
-        </ul>
-      </header>
+      <Header active="tupian" />
 
       <div className="banner">
         <img src="/images/emilia.jpg" alt="图片鉴赏" />
@@ -23,19 +14,7 @@ export default function Tupian() {
         <div className="title">
           <h2>图片鉴赏</h2>
         </div>
-        <ul className="pic_con clearfix">
-          <li><div className="box"><img src="/images/emilia.jpg" alt="爱蜜莉雅1" /></div></li>
-          <li><div className="box"><img src="/images/character2.jpg" alt="角色2" /></div></li>
-          <li><div className="box"><img src="/images/emilia2.jpg" alt="爱蜜莉雅2" /></div></li>
-          <li><div className="box"><img src="/images/character4.jpg" alt="角色4" /></div></li>
-          <li><div className="box"><img src="/images/character5.jpg" alt="角色5" /></div></li>
-          <li><div className="box"><img src="/images/character6.jpg" alt="角色6" /></div></li>
-          <li><div className="box"><img src="/images/character7.jpg" alt="角色7" /></div></li>
-          <li><div className="box"><img src="/images/character8.jpg" alt="角色8" /></div></li>
-          <li><div className="box"><img src="/images/character9.jpg" alt="角色9" /></div></li>
-          <li><div className="box"><img src="/images/character10.jpg" alt="角色10" /></div></li>
-          <li><div className="box"><img src="/images/character11.jpg" alt="角色11" /></div></li>
-        </ul>
+        <ImageGallery />
       </div>
 
       <footer>
