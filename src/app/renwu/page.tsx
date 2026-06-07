@@ -107,7 +107,7 @@ export default function Renwu() {
 
         <div style={{ marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <p style={{ color: "#666" }}>Re:从零开始的异世界生活 主要角色介绍</p>
-          {user?.role === "admin" && (
+          {user && (
             <button
               onClick={() => setShowForm(!showForm)}
               style={{

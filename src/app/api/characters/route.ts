@@ -16,7 +16,6 @@ export async function POST(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ error: "未登录" }, { status: 401 });
-    if (payload.role !== "admin") return NextResponse.json({ error: "无权限" }, { status: 403 });
 
     const body = await req.json();
     const { id, name, nameJp, alias, image, intro, info, sections, trivias } = body;
