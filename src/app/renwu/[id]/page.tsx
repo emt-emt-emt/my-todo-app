@@ -75,6 +75,17 @@ export default async function CharacterPage({ params }: CharacterPageProps) {
               </div>
             ))}
 
+            {char.trivias.length > 0 && (
+              <div className="section trivias">
+                <h3>🎓 你知道吗</h3>
+                <ul>
+                  {char.trivias.map((trivia, idx) => (
+                    <li key={idx}>{trivia}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="back">
               <Link href="/renwu">← 返回人物列表</Link>
             </div>
