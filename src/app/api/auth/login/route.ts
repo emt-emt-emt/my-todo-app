@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "输入格式错误" }, { status: 400 });
     }
 
-    const user = db.users.findByUsername(result.data.username);
+    const user = await db.users.findByUsername(result.data.username);
     if (!user) {
       return NextResponse.json({ error: "用户名或密码错误" }, { status: 401 });
     }

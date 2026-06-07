@@ -10,13 +10,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "输入格式错误" }, { status: 400 });
     }
 
-    const existing = db.users.findByUsername(result.data.username);
+    const existing = await db.users.findByUsername(result.data.username);
     if (existing) {
       return NextResponse.json({ error: "用户名已存在" }, { status: 409 });
     }
 
     const hash = await bcrypt.hash(result.data.password, 10);
-    const user = db.users.create({
+    const user = await db.users.create({
       username: result.data.username,
       password: hash,
       role: "user",

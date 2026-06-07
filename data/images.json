@@ -1,0 +1,8 @@
+[
+  { "id": 1, "userId": 1, "username": "admin", "sectionId": 1, "url": "/images/emilia.jpg", "description": "爱蜜莉雅", "createdAt": "2026-06-07T00:00:00.000Z" },
+  { "id": 2, "userId": 1, "username": "admin", "sectionId": 1, "url": "/images/subaru.png", "description": "菜月昴", "createdAt": "2026-06-07T00:00:00.000Z" },
+  { "id": 3, "userId": 1, "username": "admin", "sectionId": 1, "url": "/images/rem.png", "description": "雷姆", "createdAt": "2026-06-07T00:00:00.000Z" },
+  { "id": 4, "userId": 1, "username": "admin", "sectionId": 1, "url": "/images/ram.png", "description": "拉姆", "createdAt": "2026-06-07T00:00:00.000Z" },
+  { "id": 5, "userId": 1, "username": "admin", "sectionId": 1, "url": "/images/puck.png", "description": "帕克", "createdAt": "2026-06-07T00:00:00.000Z" },
+  { "id": 6, "userId": 1, "username": "admin", "sectionId": 1, "url": "/images/reinhard.png", "description": "莱茵哈鲁特", "createdAt": "2026-06-07T00:00:00.000Z" }
+]

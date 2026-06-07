@@ -7,10 +7,10 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const sectionId = searchParams.get("sectionId");
     if (sectionId) {
-      const images = db.images.findBySectionId(Number(sectionId));
+      const images = await db.images.findBySectionId(Number(sectionId));
       return NextResponse.json({ images });
     }
-    const images = db.images.findAll();
+    const images = await db.images.findAll();
     return NextResponse.json({ images });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });
@@ -23,14 +23,14 @@ export async function POST(req: NextRequest) {
     const payload = token ? await verifyToken(token) : null;
     if (!payload) return NextResponse.json({ error: "未登录" }, { status: 401 });
 
-    const user = db.users.findById(payload.userId);
+    const user = await db.users.findById(payload.userId);
     if (!user || user.banned) return NextResponse.json({ error: "账号已被禁言" }, { status: 403 });
 
     const body = await req.json();
     const result = imageSchema.safeParse(body);
     if (!result.success) return NextResponse.json({ error: "输入格式错误" }, { status: 400 });
 
-    const image = db.images.create({
+    const image = await db.images.create({
       userId: payload.userId,
       username: payload.username,
       sectionId: result.data.sectionId,
@@ -54,7 +54,7 @@ export async function DELETE(req: NextRequest) {
     const id = Number(searchParams.get("id"));
     if (!id) return NextResponse.json({ error: "缺少参数" }, { status: 400 });
 
-    db.images.delete(id);
+    await db.images.delete(id);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });

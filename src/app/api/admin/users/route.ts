@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: "未登录" }, { status: 401 });
     if (payload.role !== "admin") return NextResponse.json({ error: "无权限" }, { status: 403 });
 
-    const users = db.users.findAll().map(u => ({ id: u.id, username: u.username, role: u.role, banned: u.banned, createdAt: u.createdAt }));
+    const users = (await db.users.findAll()).map(u => ({ id: u.id, username: u.username, role: u.role, banned: u.banned, createdAt: u.createdAt }));
     return NextResponse.json({ users });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest) {
     const { id, banned } = body;
     if (!id) return NextResponse.json({ error: "缺少参数" }, { status: 400 });
 
-    db.users.update(id, { banned });
+    await db.users.update(id, { banned });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });
@@ -45,7 +45,7 @@ export async function DELETE(req: NextRequest) {
     const id = Number(searchParams.get("id"));
     if (!id) return NextResponse.json({ error: "缺少参数" }, { status: 400 });
 
-    db.users.delete(id);
+    await db.users.delete(id);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });

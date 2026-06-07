@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: "未登录" }, { status: 401 });
     if (payload.role !== "admin") return NextResponse.json({ error: "无权限" }, { status: 403 });
 
-    const comments = db.comments.findAll();
+    const comments = await db.comments.findAll();
     return NextResponse.json({ comments });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });

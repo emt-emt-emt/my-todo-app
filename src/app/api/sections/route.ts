@@ -4,7 +4,7 @@ import { verifyToken } from "@/lib/auth";
 
 export async function GET() {
   try {
-    const sections = db.sections.findAll();
+    const sections = await db.sections.findAll();
     return NextResponse.json({ sections });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     if (payload.role !== "admin") return NextResponse.json({ error: "无权限" }, { status: 403 });
 
     const body = await req.json();
-    const section = db.sections.create({
+    const section = await db.sections.create({
       name: body.name,
       description: body.description || "",
     });
@@ -40,7 +40,7 @@ export async function DELETE(req: NextRequest) {
     const id = Number(searchParams.get("id"));
     if (!id) return NextResponse.json({ error: "缺少参数" }, { status: 400 });
 
-    db.sections.delete(id);
+    await db.sections.delete(id);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });

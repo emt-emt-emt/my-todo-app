@@ -1,7 +1,8 @@
+import { promises as fs } from "fs";
+import { join } from "path";
 import { z } from "zod";
 
-// 内存数据库（演示用，Vercel 重启后数据会重置）
-// 生产环境建议替换为 PostgreSQL / Turso / Supabase
+const DATA_DIR = join(process.cwd(), "data");
 
 export interface User {
   id: number;
@@ -37,82 +38,119 @@ export interface Image {
   createdAt: string;
 }
 
-let users: User[] = [
-  {
-    id: 1,
-    username: "admin",
-    password: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password: admin123
-    role: "admin",
-    banned: false,
-    createdAt: new Date().toISOString(),
-  },
-];
-let comments: Comment[] = [];
-let sections: ImageSection[] = [
-  { id: 1, name: "角色美图", description: "主要角色精美插画" },
-  { id: 2, name: "场景截图", description: "动画经典场景截图" },
-  { id: 3, name: "粉丝创作", description: "粉丝投稿的同人作品" },
-];
-let images: Image[] = [
-  { id: 1, userId: 1, username: "admin", sectionId: 1, url: "/images/emilia.jpg", description: "爱蜜莉雅", createdAt: new Date().toISOString() },
-  { id: 2, userId: 1, username: "admin", sectionId: 1, url: "/images/subaru.png", description: "菜月昴", createdAt: new Date().toISOString() },
-  { id: 3, userId: 1, username: "admin", sectionId: 1, url: "/images/rem.png", description: "雷姆", createdAt: new Date().toISOString() },
-  { id: 4, userId: 1, username: "admin", sectionId: 1, url: "/images/ram.png", description: "拉姆", createdAt: new Date().toISOString() },
-  { id: 5, userId: 1, username: "admin", sectionId: 1, url: "/images/puck.png", description: "帕克", createdAt: new Date().toISOString() },
-  { id: 6, userId: 1, username: "admin", sectionId: 1, url: "/images/reinhard.png", description: "莱茵哈鲁特", createdAt: new Date().toISOString() },
-];
+async function readJson<T>(file: string): Promise<T> {
+  try {
+    const data = await fs.readFile(join(DATA_DIR, file), "utf-8");
+    return JSON.parse(data) as T;
+  } catch {
+    return [] as unknown as T;
+  }
+}
 
-let idCounters = { user: 1, comment: 0, section: 3, image: 6 };
+async function writeJson<T>(file: string, data: T): Promise<void> {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(join(DATA_DIR, file), JSON.stringify(data, null, 2), "utf-8");
+}
+
+async function getNextId(file: string): Promise<number> {
+  const data = await readJson<unknown[]>(file);
+  if (data.length === 0) return 1;
+  const maxId = Math.max(...(data as { id: number }[]).map((item) => item.id));
+  return maxId + 1;
+}
 
 export const db = {
   users: {
-    findAll: () => users.filter(u => !u.banned),
-    findById: (id: number) => users.find(u => u.id === id && !u.banned),
-    findByUsername: (username: string) => users.find(u => u.username === username),
-    create: (data: Omit<User, "id" | "createdAt">) => {
-      idCounters.user++;
-      const user: User = { ...data, id: idCounters.user, createdAt: new Date().toISOString() };
+    findAll: async () => {
+      const users = await readJson<User[]>("users.json");
+      return users.filter((u) => !u.banned);
+    },
+    findById: async (id: number) => {
+      const users = await readJson<User[]>("users.json");
+      return users.find((u) => u.id === id && !u.banned);
+    },
+    findByUsername: async (username: string) => {
+      const users = await readJson<User[]>("users.json");
+      return users.find((u) => u.username === username);
+    },
+    create: async (data: Omit<User, "id" | "createdAt">) => {
+      const users = await readJson<User[]>("users.json");
+      const id = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
+      const user: User = { ...data, id, createdAt: new Date().toISOString() };
       users.push(user);
+      await writeJson("users.json", users);
       return user;
     },
-    update: (id: number, data: Partial<User>) => {
-      const idx = users.findIndex(u => u.id === id);
-      if (idx >= 0) users[idx] = { ...users[idx], ...data };
+    update: async (id: number, data: Partial<User>) => {
+      const users = await readJson<User[]>("users.json");
+      const idx = users.findIndex((u) => u.id === id);
+      if (idx >= 0) {
+        users[idx] = { ...users[idx], ...data };
+        await writeJson("users.json", users);
+      }
       return users[idx];
     },
-    delete: (id: number) => { users = users.filter(u => u.id !== id); },
+    delete: async (id: number) => {
+      const users = await readJson<User[]>("users.json");
+      const filtered = users.filter((u) => u.id !== id);
+      await writeJson("users.json", filtered);
+    },
   },
   comments: {
-    findAll: () => comments,
-    findByCharacterId: (characterId: string) => comments.filter(c => c.characterId === characterId).reverse(),
-    create: (data: Omit<Comment, "id" | "createdAt">) => {
-      idCounters.comment++;
-      const comment: Comment = { ...data, id: idCounters.comment, createdAt: new Date().toISOString() };
+    findAll: async () => readJson<Comment[]>("comments.json"),
+    findByCharacterId: async (characterId: string) => {
+      const comments = await readJson<Comment[]>("comments.json");
+      return comments.filter((c) => c.characterId === characterId).reverse();
+    },
+    create: async (data: Omit<Comment, "id" | "createdAt">) => {
+      const comments = await readJson<Comment[]>("comments.json");
+      const id = comments.length > 0 ? Math.max(...comments.map((c) => c.id)) + 1 : 1;
+      const comment: Comment = { ...data, id, createdAt: new Date().toISOString() };
       comments.push(comment);
+      await writeJson("comments.json", comments);
       return comment;
     },
-    delete: (id: number) => { comments = comments.filter(c => c.id !== id); },
+    delete: async (id: number) => {
+      const comments = await readJson<Comment[]>("comments.json");
+      const filtered = comments.filter((c) => c.id !== id);
+      await writeJson("comments.json", filtered);
+    },
   },
   sections: {
-    findAll: () => sections,
-    create: (data: Omit<ImageSection, "id">) => {
-      idCounters.section++;
-      const section: ImageSection = { ...data, id: idCounters.section };
+    findAll: async () => readJson<ImageSection[]>("sections.json"),
+    create: async (data: Omit<ImageSection, "id">) => {
+      const sections = await readJson<ImageSection[]>("sections.json");
+      const id = sections.length > 0 ? Math.max(...sections.map((s) => s.id)) + 1 : 1;
+      const section: ImageSection = { ...data, id };
       sections.push(section);
+      await writeJson("sections.json", sections);
       return section;
     },
-    delete: (id: number) => { sections = sections.filter(s => s.id !== id); },
+    delete: async (id: number) => {
+      const sections = await readJson<ImageSection[]>("sections.json");
+      const filtered = sections.filter((s) => s.id !== id);
+      await writeJson("sections.json", filtered);
+    },
   },
   images: {
-    findAll: () => images,
-    findBySectionId: (sectionId: number) => images.filter(i => i.sectionId === sectionId),
-    create: (data: Omit<Image, "id" | "createdAt">) => {
-      idCounters.image++;
-      const image: Image = { ...data, id: idCounters.image, createdAt: new Date().toISOString() };
+    findAll: async () => readJson<Image[]>("images.json"),
+    findBySectionId: async (sectionId: number) => {
+      const images = await readJson<Image[]>("images.json");
+      return images.filter((i) => i.sectionId === sectionId);
+    },
+    create: async (data: Omit<Image, "id" | "createdAt">) => {
+      const images = await readJson<Image[]>("images.json");
+      const id = images.length > 0 ? Math.max(...images.map((i) => i.id)) + 1 : 1;
+      const image: Image = { ...data, id, createdAt: new Date().toISOString() };
       images.push(image);
+      await writeJson("images.json", images);
       return image;
     },
-    delete: (id: number) => { images = images.filter(i => i.id !== id); },
+    delete: async (id: number) => {
+      const images = await readJson<Image[]>("images.json");
+      const filtered = images.filter((i) => i.id !== id);
+      await writeJson("images.json", filtered);
+    },
   },
 };
 

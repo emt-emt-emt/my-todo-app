@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const payload = await verifyToken(token);
     if (!payload) return NextResponse.json({ user: null });
 
-    const user = db.users.findById(payload.userId);
+    const user = await db.users.findById(payload.userId);
     if (!user || user.banned) return NextResponse.json({ user: null });
 
     return NextResponse.json({
