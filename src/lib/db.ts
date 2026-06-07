@@ -38,6 +38,24 @@ export interface Image {
   createdAt: string;
 }
 
+export interface Post {
+  id: number;
+  userId: number;
+  username: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface Reply {
+  id: number;
+  postId: number;
+  userId: number;
+  username: string;
+  content: string;
+  createdAt: string;
+}
+
 async function readJson<T>(file: string): Promise<T> {
   try {
     const data = await fs.readFile(join(DATA_DIR, file), "utf-8");
@@ -152,6 +170,52 @@ export const db = {
       await writeJson("images.json", filtered);
     },
   },
+  posts: {
+    findAll: async () => {
+      const posts = await readJson<Post[]>("posts.json");
+      return posts.reverse();
+    },
+    findById: async (id: number) => {
+      const posts = await readJson<Post[]>("posts.json");
+      return posts.find((p) => p.id === id);
+    },
+    create: async (data: Omit<Post, "id" | "createdAt">) => {
+      const posts = await readJson<Post[]>("posts.json");
+      const id = posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 1;
+      const post: Post = { ...data, id, createdAt: new Date().toISOString() };
+      posts.push(post);
+      await writeJson("posts.json", posts);
+      return post;
+    },
+    delete: async (id: number) => {
+      const posts = await readJson<Post[]>("posts.json");
+      const filtered = posts.filter((p) => p.id !== id);
+      await writeJson("posts.json", filtered);
+      // 同时删除相关回复
+      const replies = await readJson<Reply[]>("replies.json");
+      const filteredReplies = replies.filter((r) => r.postId !== id);
+      await writeJson("replies.json", filteredReplies);
+    },
+  },
+  replies: {
+    findByPostId: async (postId: number) => {
+      const replies = await readJson<Reply[]>("replies.json");
+      return replies.filter((r) => r.postId === postId);
+    },
+    create: async (data: Omit<Reply, "id" | "createdAt">) => {
+      const replies = await readJson<Reply[]>("replies.json");
+      const id = replies.length > 0 ? Math.max(...replies.map((r) => r.id)) + 1 : 1;
+      const reply: Reply = { ...data, id, createdAt: new Date().toISOString() };
+      replies.push(reply);
+      await writeJson("replies.json", replies);
+      return reply;
+    },
+    delete: async (id: number) => {
+      const replies = await readJson<Reply[]>("replies.json");
+      const filtered = replies.filter((r) => r.id !== id);
+      await writeJson("replies.json", filtered);
+    },
+  },
 };
 
 export const loginSchema = z.object({
@@ -173,4 +237,14 @@ export const imageSchema = z.object({
   sectionId: z.number().int(),
   url: z.string().url(),
   description: z.string().max(200),
+});
+
+export const postSchema = z.object({
+  title: z.string().min(1).max(100),
+  content: z.string().min(1).max(5000),
+});
+
+export const replySchema = z.object({
+  postId: z.number().int(),
+  content: z.string().min(1).max(1000),
 });
