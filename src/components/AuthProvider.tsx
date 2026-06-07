@@ -12,7 +12,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
 }
 
@@ -61,13 +61,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   }
 
-  async function register(username: string, password: string): Promise<boolean> {
+  async function register(username: string, password: string): Promise<{ ok: boolean; error?: string }> {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
-    return res.ok;
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, error: data.error || "注册失败" };
+    }
+    return { ok: true };
   }
 
   async function logout() {

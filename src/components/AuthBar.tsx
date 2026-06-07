@@ -22,9 +22,10 @@ export function AuthBar() {
         if (!ok) setError("登录失败，用户名或密码错误");
         else setShowModal(false);
       } else {
-        const ok = await register(username, password);
-        if (!ok) setError("注册失败，用户名可能已存在");
-        else {
+        const result = await register(username, password);
+        if (!result.ok) {
+          setError(result.error || "注册失败，请重试");
+        } else {
           setError("注册成功！请登录");
           setIsLogin(true);
         }
