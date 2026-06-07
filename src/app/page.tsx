@@ -69,7 +69,7 @@ export default function Home() {
       <footer>
         <p>
           <a
-            href="https://www.bilibili.com/bangumi/media/md28229617"
+            href="https://www.bilibili.com/bangumi/media/md28224394"
             target="_blank"
           >
             <strong>【B站】Re:从零开始的异世界生活 在线观看</strong>
