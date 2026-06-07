@@ -26,7 +26,7 @@ export default function Renwu() {
         <ul className="renwu_box">
           <li>
             <div className="pic">
-              <img src="/images/emilia.jpg" alt="菜月昴" />
+              <img src="/images/subaru.png" alt="菜月昴" />
             </div>
             <div className="text">
               <p><b>菜月昴</b><br />
@@ -37,7 +37,7 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="/images/character2.jpg" alt="爱蜜莉雅" />
+              <img src="/images/emilia.jpg" alt="爱蜜莉雅" />
             </div>
             <div className="text">
               <b>爱蜜莉雅</b><br />
@@ -47,7 +47,7 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="/images/emilia.jpg" alt="雷姆" />
+              <img src="/images/rem.png" alt="雷姆" />
             </div>
             <div className="text">
               <b>雷姆</b><br />
@@ -57,7 +57,7 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="/images/character2.jpg" alt="拉姆" />
+              <img src="/images/ram.png" alt="拉姆" />
             </div>
             <div className="text">
               <b>拉姆</b><br />
@@ -67,12 +67,22 @@ export default function Renwu() {
           </li>
           <li>
             <div className="pic">
-              <img src="/images/emilia.jpg" alt="帕克" />
+              <img src="/images/puck.png" alt="帕克" />
             </div>
             <div className="text">
               <b>帕克</b><br />
                   爱蜜莉雅缔结契约的精灵，被称为"永久冻土的终焉之兽"。<br />
                   平时以可爱的猫型精灵形态出现，与爱蜜莉雅关系亲密如父女。真实形态是巨大而强大的冰之兽，拥有毁灭世界的力量。性格温和友善，但非常保护爱蜜莉雅，不允许任何人伤害她。
+            </div>
+          </li>
+          <li>
+            <div className="pic">
+              <img src="/images/reinhard.png" alt="莱茵哈鲁特" />
+            </div>
+            <div className="text">
+              <b>莱茵哈鲁特·范·阿斯特雷亚</b><br />
+              王国骑士团所属的近卫骑士，被称为"剑圣"。<br />
+              拥有剑圣的加护，是当代最强的剑士。出身于剑圣世家阿斯特雷亚家，继承了代代相传的龙剑雷德。性格正直善良，正义感极强，深受王国民众的爱戴。与菲鲁特关系亲密，在王选中支持菲鲁特成为国王候选人。虽然拥有压倒性的实力，但从不傲慢，对所有人都保持谦逊的态度。
             </div>
           </li>
         </ul>
