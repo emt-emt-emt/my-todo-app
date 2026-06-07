@@ -40,8 +40,8 @@ export default function Tupian() {
 
       <footer>
         <p>
-          <a href="https://search.bilibili.com/all?keyword=Re%3A%E4%BB%8E%E9%9B%B6%E5%BC%80%E5%A7%8B%E7%9A%84%E5%BC%82%E4%B8%96%E7%95%8C%E7%94%9F%E6%B4%BB" target="_blank">
-            <strong>Re:从零开始的异世界生活</strong>
+          <a href="https://www.bilibili.com/bangumi/media/md28229617" target="_blank">
+            <strong>【B站】Re:从零开始的异世界生活 在线观看</strong>
           </a>
         </p>
       </footer>
