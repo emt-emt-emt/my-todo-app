@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, User } from "@/lib/db";
 import { verifyToken } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: "未登录" }, { status: 401 });
     if (payload.role !== "admin") return NextResponse.json({ error: "无权限" }, { status: 403 });
 
-    const users = (await db.users.findAll()).map(u => ({ id: u.id, username: u.username, role: u.role, banned: u.banned, createdAt: u.createdAt }));
+    const users = (await db.users.findAll()).map((u: User) => ({ id: u.id, username: u.username, role: u.role, banned: u.banned, createdAt: u.createdAt }));
     return NextResponse.json({ users });
   } catch {
     return NextResponse.json({ error: "服务器错误" }, { status: 500 });

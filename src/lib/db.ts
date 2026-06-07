@@ -1,9 +1,144 @@
-import { promises as fs } from "fs";
-import { join } from "path";
 import { z } from "zod";
 
-const DATA_DIR = join(process.cwd(), "data");
+// ========== Postgres 支持 ==========
+let sql: any = null;
+let pgReady = false;
 
+async function getSql() {
+  if (!sql && process.env.POSTGRES_URL) {
+    const { sql: sqlFn } = await import("@vercel/postgres");
+    sql = sqlFn;
+  }
+  return sql;
+}
+
+async function initPg() {
+  if (pgReady || !process.env.POSTGRES_URL) return;
+
+  const s = await getSql();
+  if (!s) throw new Error("Failed to load Postgres");
+
+  await s`CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(20) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(10) DEFAULT 'user',
+    banned BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  await s`CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    character_id VARCHAR(50) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  await s`CREATE TABLE IF NOT EXISTS posts (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  await s`CREATE TABLE IF NOT EXISTS replies (
+    id SERIAL PRIMARY KEY,
+    post_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  await s`CREATE TABLE IF NOT EXISTS images (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    section_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    description VARCHAR(200),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
+  await s`CREATE TABLE IF NOT EXISTS sections (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description VARCHAR(200)
+  )`;
+
+  // 检查是否需要插入默认数据
+  const { rows } = await s`SELECT COUNT(*) as count FROM users`;
+  if (Number(rows[0].count) === 0) {
+    const bcrypt = await import("bcryptjs");
+    const adminHash = bcrypt.hashSync("admin123", 10);
+
+    await s`INSERT INTO users (username, password, role, banned) VALUES ('admin', ${adminHash}, 'admin', false)`;
+
+    await s`INSERT INTO sections (name, description) VALUES
+      ('角色美图', '主要角色精美插画'),
+      ('场景截图', '动画经典场景截图'),
+      ('粉丝创作', '粉丝投稿的同人作品')`;
+
+    await s`INSERT INTO images (user_id, username, section_id, url, description) VALUES
+      (1, 'admin', 1, '/images/emilia.jpg', '爱蜜莉雅'),
+      (1, 'admin', 1, '/images/subaru.png', '菜月昴'),
+      (1, 'admin', 1, '/images/rem.png', '雷姆'),
+      (1, 'admin', 1, '/images/ram.png', '拉姆'),
+      (1, 'admin', 1, '/images/puck.png', '帕克'),
+      (1, 'admin', 1, '/images/reinhard.png', '莱茵哈鲁特')`;
+  }
+
+  pgReady = true;
+}
+
+function isPg() {
+  return !!process.env.POSTGRES_URL;
+}
+
+// ========== 内存存储 ==========
+let memoryUsers: User[] = [];
+let memoryComments: Comment[] = [];
+let memoryPosts: Post[] = [];
+let memoryReplies: Reply[] = [];
+let memoryImages: Image[] = [];
+let memorySections: ImageSection[] = [];
+let memoryIdCounters = { user: 1, comment: 0, post: 0, reply: 0, image: 6, section: 3 };
+
+function initMemory() {
+  if (memoryUsers.length > 0) return;
+
+  memoryUsers = [
+    {
+      id: 1,
+      username: "admin",
+      password: "$2b$10$1tyv7b4fYxe8amh1VzbsOuOfrusFPZFsYUWcbJZGswgv9bSx.mVvG",
+      role: "admin",
+      banned: false,
+      createdAt: new Date().toISOString(),
+    },
+  ];
+
+  memorySections = [
+    { id: 1, name: "角色美图", description: "主要角色精美插画" },
+    { id: 2, name: "场景截图", description: "动画经典场景截图" },
+    { id: 3, name: "粉丝创作", description: "粉丝投稿的同人作品" },
+  ];
+
+  memoryImages = [
+    { id: 1, userId: 1, username: "admin", sectionId: 1, url: "/images/emilia.jpg", description: "爱蜜莉雅", createdAt: new Date().toISOString() },
+    { id: 2, userId: 1, username: "admin", sectionId: 1, url: "/images/subaru.png", description: "菜月昴", createdAt: new Date().toISOString() },
+    { id: 3, userId: 1, username: "admin", sectionId: 1, url: "/images/rem.png", description: "雷姆", createdAt: new Date().toISOString() },
+    { id: 4, userId: 1, username: "admin", sectionId: 1, url: "/images/ram.png", description: "拉姆", createdAt: new Date().toISOString() },
+    { id: 5, userId: 1, username: "admin", sectionId: 1, url: "/images/puck.png", description: "帕克", createdAt: new Date().toISOString() },
+    { id: 6, userId: 1, username: "admin", sectionId: 1, url: "/images/reinhard.png", description: "莱茵哈鲁特", createdAt: new Date().toISOString() },
+  ];
+}
+
+// ========== 接口 ==========
 export interface User {
   id: number;
   username: string;
@@ -12,7 +147,6 @@ export interface User {
   banned: boolean;
   createdAt: string;
 }
-
 export interface Comment {
   id: number;
   userId: number;
@@ -21,13 +155,27 @@ export interface Comment {
   content: string;
   createdAt: string;
 }
-
+export interface Post {
+  id: number;
+  userId: number;
+  username: string;
+  title: string;
+  content: string;
+  createdAt: string;
+}
+export interface Reply {
+  id: number;
+  postId: number;
+  userId: number;
+  username: string;
+  content: string;
+  createdAt: string;
+}
 export interface ImageSection {
   id: number;
   name: string;
   description: string;
 }
-
 export interface Image {
   id: number;
   userId: number;
@@ -38,182 +186,342 @@ export interface Image {
   createdAt: string;
 }
 
-export interface Post {
-  id: number;
-  userId: number;
-  username: string;
-  title: string;
-  content: string;
-  createdAt: string;
+// 映射函数
+function mapUser(r: any): User {
+  return {
+    id: r.id,
+    username: r.username,
+    password: r.password,
+    role: r.role,
+    banned: r.banned,
+    createdAt: r.created_at || r.createdAt,
+  };
+}
+function mapComment(r: any): Comment {
+  return {
+    id: r.id,
+    userId: r.user_id || r.userId,
+    username: r.username,
+    characterId: r.character_id || r.characterId,
+    content: r.content,
+    createdAt: r.created_at || r.createdAt,
+  };
+}
+function mapPost(r: any): Post {
+  return {
+    id: r.id,
+    userId: r.user_id || r.userId,
+    username: r.username,
+    title: r.title,
+    content: r.content,
+    createdAt: r.created_at || r.createdAt,
+  };
+}
+function mapReply(r: any): Reply {
+  return {
+    id: r.id,
+    postId: r.post_id || r.postId,
+    userId: r.user_id || r.userId,
+    username: r.username,
+    content: r.content,
+    createdAt: r.created_at || r.createdAt,
+  };
+}
+function mapImage(r: any): Image {
+  return {
+    id: r.id,
+    userId: r.user_id || r.userId,
+    username: r.username,
+    sectionId: r.section_id || r.sectionId,
+    url: r.url,
+    description: r.description,
+    createdAt: r.created_at || r.createdAt,
+  };
+}
+function mapSection(r: any): ImageSection {
+  return { id: r.id, name: r.name, description: r.description };
 }
 
-export interface Reply {
-  id: number;
-  postId: number;
-  userId: number;
-  username: string;
-  content: string;
-  createdAt: string;
-}
-
-async function readJson<T>(file: string): Promise<T> {
-  try {
-    const data = await fs.readFile(join(DATA_DIR, file), "utf-8");
-    return JSON.parse(data) as T;
-  } catch {
-    return [] as unknown as T;
-  }
-}
-
-async function writeJson<T>(file: string, data: T): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(join(DATA_DIR, file), JSON.stringify(data, null, 2), "utf-8");
-}
-
-async function getNextId(file: string): Promise<number> {
-  const data = await readJson<unknown[]>(file);
-  if (data.length === 0) return 1;
-  const maxId = Math.max(...(data as { id: number }[]).map((item) => item.id));
-  return maxId + 1;
-}
-
+// ========== DB 实现 ==========
 export const db = {
   users: {
     findAll: async () => {
-      const users = await readJson<User[]>("users.json");
-      return users.filter((u) => !u.banned);
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM users WHERE banned = false`;
+        return rows.map(mapUser);
+      }
+      initMemory();
+      return memoryUsers.filter((u) => !u.banned);
     },
     findById: async (id: number) => {
-      const users = await readJson<User[]>("users.json");
-      return users.find((u) => u.id === id && !u.banned);
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM users WHERE id = ${id} AND banned = false`;
+        return rows.length ? mapUser(rows[0]) : undefined;
+      }
+      initMemory();
+      return memoryUsers.find((u) => u.id === id && !u.banned);
     },
     findByUsername: async (username: string) => {
-      const users = await readJson<User[]>("users.json");
-      return users.find((u) => u.username === username);
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM users WHERE username = ${username}`;
+        return rows.length ? mapUser(rows[0]) : undefined;
+      }
+      initMemory();
+      return memoryUsers.find((u) => u.username === username);
     },
     create: async (data: Omit<User, "id" | "createdAt">) => {
-      const users = await readJson<User[]>("users.json");
-      const id = users.length > 0 ? Math.max(...users.map((u) => u.id)) + 1 : 1;
-      const user: User = { ...data, id, createdAt: new Date().toISOString() };
-      users.push(user);
-      await writeJson("users.json", users);
-      return user;
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO users (username, password, role, banned)
+          VALUES (${data.username}, ${data.password}, ${data.role}, ${data.banned})
+          RETURNING id, created_at
+        `;
+        return { ...data, id: rows[0].id, createdAt: rows[0].created_at } as User;
+      }
+      initMemory();
+      memoryIdCounters.user++;
+      const user = { ...data, id: memoryIdCounters.user, createdAt: new Date().toISOString() };
+      memoryUsers.push(user);
+      return user as User;
     },
     update: async (id: number, data: Partial<User>) => {
-      const users = await readJson<User[]>("users.json");
-      const idx = users.findIndex((u) => u.id === id);
-      if (idx >= 0) {
-        users[idx] = { ...users[idx], ...data };
-        await writeJson("users.json", users);
+      if (isPg()) {
+        await initPg();
+        if (data.banned !== undefined)
+          await (await getSql())`UPDATE users SET banned = ${data.banned} WHERE id = ${id}`;
+        if (data.password !== undefined)
+          await (await getSql())`UPDATE users SET password = ${data.password} WHERE id = ${id}`;
+        if (data.role !== undefined)
+          await (await getSql())`UPDATE users SET role = ${data.role} WHERE id = ${id}`;
+        const { rows } = await (await getSql())`SELECT * FROM users WHERE id = ${id}`;
+        return rows.length ? mapUser(rows[0]) : undefined;
       }
-      return users[idx];
+      initMemory();
+      const idx = memoryUsers.findIndex((u) => u.id === id);
+      if (idx >= 0) memoryUsers[idx] = { ...memoryUsers[idx], ...data };
+      return memoryUsers[idx];
     },
     delete: async (id: number) => {
-      const users = await readJson<User[]>("users.json");
-      const filtered = users.filter((u) => u.id !== id);
-      await writeJson("users.json", filtered);
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM users WHERE id = ${id}`;
+        return;
+      }
+      initMemory();
+      memoryUsers = memoryUsers.filter((u) => u.id !== id);
     },
   },
   comments: {
-    findAll: async () => readJson<Comment[]>("comments.json"),
+    findAll: async () => {
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM comments`;
+        return rows.map(mapComment);
+      }
+      initMemory();
+      return memoryComments;
+    },
     findByCharacterId: async (characterId: string) => {
-      const comments = await readJson<Comment[]>("comments.json");
-      return comments.filter((c) => c.characterId === characterId).reverse();
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM comments WHERE character_id = ${characterId} ORDER BY created_at DESC`;
+        return rows.map(mapComment);
+      }
+      initMemory();
+      return memoryComments.filter((c) => c.characterId === characterId).reverse();
     },
     create: async (data: Omit<Comment, "id" | "createdAt">) => {
-      const comments = await readJson<Comment[]>("comments.json");
-      const id = comments.length > 0 ? Math.max(...comments.map((c) => c.id)) + 1 : 1;
-      const comment: Comment = { ...data, id, createdAt: new Date().toISOString() };
-      comments.push(comment);
-      await writeJson("comments.json", comments);
-      return comment;
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO comments (user_id, username, character_id, content)
+          VALUES (${data.userId}, ${data.username}, ${data.characterId}, ${data.content})
+          RETURNING id, created_at
+        `;
+        return { ...data, id: rows[0].id, createdAt: rows[0].created_at } as Comment;
+      }
+      initMemory();
+      memoryIdCounters.comment++;
+      const comment = { ...data, id: memoryIdCounters.comment, createdAt: new Date().toISOString() };
+      memoryComments.push(comment);
+      return comment as Comment;
     },
     delete: async (id: number) => {
-      const comments = await readJson<Comment[]>("comments.json");
-      const filtered = comments.filter((c) => c.id !== id);
-      await writeJson("comments.json", filtered);
-    },
-  },
-  sections: {
-    findAll: async () => readJson<ImageSection[]>("sections.json"),
-    create: async (data: Omit<ImageSection, "id">) => {
-      const sections = await readJson<ImageSection[]>("sections.json");
-      const id = sections.length > 0 ? Math.max(...sections.map((s) => s.id)) + 1 : 1;
-      const section: ImageSection = { ...data, id };
-      sections.push(section);
-      await writeJson("sections.json", sections);
-      return section;
-    },
-    delete: async (id: number) => {
-      const sections = await readJson<ImageSection[]>("sections.json");
-      const filtered = sections.filter((s) => s.id !== id);
-      await writeJson("sections.json", filtered);
-    },
-  },
-  images: {
-    findAll: async () => readJson<Image[]>("images.json"),
-    findBySectionId: async (sectionId: number) => {
-      const images = await readJson<Image[]>("images.json");
-      return images.filter((i) => i.sectionId === sectionId);
-    },
-    create: async (data: Omit<Image, "id" | "createdAt">) => {
-      const images = await readJson<Image[]>("images.json");
-      const id = images.length > 0 ? Math.max(...images.map((i) => i.id)) + 1 : 1;
-      const image: Image = { ...data, id, createdAt: new Date().toISOString() };
-      images.push(image);
-      await writeJson("images.json", images);
-      return image;
-    },
-    delete: async (id: number) => {
-      const images = await readJson<Image[]>("images.json");
-      const filtered = images.filter((i) => i.id !== id);
-      await writeJson("images.json", filtered);
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM comments WHERE id = ${id}`;
+        return;
+      }
+      initMemory();
+      memoryComments = memoryComments.filter((c) => c.id !== id);
     },
   },
   posts: {
     findAll: async () => {
-      const posts = await readJson<Post[]>("posts.json");
-      return posts.reverse();
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM posts ORDER BY created_at DESC`;
+        return rows.map(mapPost);
+      }
+      initMemory();
+      return [...memoryPosts].reverse();
     },
     findById: async (id: number) => {
-      const posts = await readJson<Post[]>("posts.json");
-      return posts.find((p) => p.id === id);
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM posts WHERE id = ${id}`;
+        return rows.length ? mapPost(rows[0]) : undefined;
+      }
+      initMemory();
+      return memoryPosts.find((p) => p.id === id);
     },
     create: async (data: Omit<Post, "id" | "createdAt">) => {
-      const posts = await readJson<Post[]>("posts.json");
-      const id = posts.length > 0 ? Math.max(...posts.map((p) => p.id)) + 1 : 1;
-      const post: Post = { ...data, id, createdAt: new Date().toISOString() };
-      posts.push(post);
-      await writeJson("posts.json", posts);
-      return post;
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO posts (user_id, username, title, content)
+          VALUES (${data.userId}, ${data.username}, ${data.title}, ${data.content})
+          RETURNING id, created_at
+        `;
+        return { ...data, id: rows[0].id, createdAt: rows[0].created_at } as Post;
+      }
+      initMemory();
+      memoryIdCounters.post++;
+      const post = { ...data, id: memoryIdCounters.post, createdAt: new Date().toISOString() };
+      memoryPosts.push(post);
+      return post as Post;
     },
     delete: async (id: number) => {
-      const posts = await readJson<Post[]>("posts.json");
-      const filtered = posts.filter((p) => p.id !== id);
-      await writeJson("posts.json", filtered);
-      // 同时删除相关回复
-      const replies = await readJson<Reply[]>("replies.json");
-      const filteredReplies = replies.filter((r) => r.postId !== id);
-      await writeJson("replies.json", filteredReplies);
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM posts WHERE id = ${id}`;
+        await (await getSql())`DELETE FROM replies WHERE post_id = ${id}`;
+        return;
+      }
+      initMemory();
+      memoryPosts = memoryPosts.filter((p) => p.id !== id);
+      memoryReplies = memoryReplies.filter((r) => r.postId !== id);
     },
   },
   replies: {
     findByPostId: async (postId: number) => {
-      const replies = await readJson<Reply[]>("replies.json");
-      return replies.filter((r) => r.postId === postId);
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM replies WHERE post_id = ${postId} ORDER BY created_at`;
+        return rows.map(mapReply);
+      }
+      initMemory();
+      return memoryReplies.filter((r) => r.postId === postId);
     },
     create: async (data: Omit<Reply, "id" | "createdAt">) => {
-      const replies = await readJson<Reply[]>("replies.json");
-      const id = replies.length > 0 ? Math.max(...replies.map((r) => r.id)) + 1 : 1;
-      const reply: Reply = { ...data, id, createdAt: new Date().toISOString() };
-      replies.push(reply);
-      await writeJson("replies.json", replies);
-      return reply;
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO replies (post_id, user_id, username, content)
+          VALUES (${data.postId}, ${data.userId}, ${data.username}, ${data.content})
+          RETURNING id, created_at
+        `;
+        return { ...data, id: rows[0].id, createdAt: rows[0].created_at } as Reply;
+      }
+      initMemory();
+      memoryIdCounters.reply++;
+      const reply = { ...data, id: memoryIdCounters.reply, createdAt: new Date().toISOString() };
+      memoryReplies.push(reply);
+      return reply as Reply;
     },
     delete: async (id: number) => {
-      const replies = await readJson<Reply[]>("replies.json");
-      const filtered = replies.filter((r) => r.id !== id);
-      await writeJson("replies.json", filtered);
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM replies WHERE id = ${id}`;
+        return;
+      }
+      initMemory();
+      memoryReplies = memoryReplies.filter((r) => r.id !== id);
+    },
+  },
+  sections: {
+    findAll: async () => {
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM sections`;
+        return rows.map(mapSection);
+      }
+      initMemory();
+      return memorySections;
+    },
+    create: async (data: Omit<ImageSection, "id">) => {
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO sections (name, description)
+          VALUES (${data.name}, ${data.description})
+          RETURNING id
+        `;
+        return { ...data, id: rows[0].id } as ImageSection;
+      }
+      initMemory();
+      memoryIdCounters.section++;
+      const section = { ...data, id: memoryIdCounters.section };
+      memorySections.push(section);
+      return section as ImageSection;
+    },
+    delete: async (id: number) => {
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM sections WHERE id = ${id}`;
+        return;
+      }
+      initMemory();
+      memorySections = memorySections.filter((s) => s.id !== id);
+    },
+  },
+  images: {
+    findAll: async () => {
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM images`;
+        return rows.map(mapImage);
+      }
+      initMemory();
+      return memoryImages;
+    },
+    findBySectionId: async (sectionId: number) => {
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM images WHERE section_id = ${sectionId}`;
+        return rows.map(mapImage);
+      }
+      initMemory();
+      return memoryImages.filter((i) => i.sectionId === sectionId);
+    },
+    create: async (data: Omit<Image, "id" | "createdAt">) => {
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO images (user_id, username, section_id, url, description)
+          VALUES (${data.userId}, ${data.username}, ${data.sectionId}, ${data.url}, ${data.description})
+          RETURNING id, created_at
+        `;
+        return { ...data, id: rows[0].id, createdAt: rows[0].created_at } as Image;
+      }
+      initMemory();
+      memoryIdCounters.image++;
+      const image = { ...data, id: memoryIdCounters.image, createdAt: new Date().toISOString() };
+      memoryImages.push(image);
+      return image as Image;
+    },
+    delete: async (id: number) => {
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM images WHERE id = ${id}`;
+        return;
+      }
+      initMemory();
+      memoryImages = memoryImages.filter((i) => i.id !== id);
     },
   },
 };
