@@ -1,20 +1,62 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "../../../components/Header";
-import { notFound } from "next/navigation";
-import { getCharacter, characters } from "../data";
+import { useAuth } from "../../../components/AuthProvider";
 import { CommentSection } from "../../../components/CommentSection";
+import { notFound } from "next/navigation";
 
-export function generateStaticParams() {
-  return characters.map((char) => ({ id: char.id }));
+interface Character {
+  id: string;
+  name: string;
+  nameJp: string;
+  alias: string;
+  image: string;
+  intro: string;
+  info: Record<string, string>;
+  sections: { title: string; content: string }[];
+  trivias: string[];
 }
 
 interface CharacterPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function CharacterPage({ params }: CharacterPageProps) {
-  const { id } = await params;
-  const char = getCharacter(id);
+export default function CharacterPage({ params }: CharacterPageProps) {
+  const { id } = React.use(params);
+  const { user } = useAuth();
+  const [char, setChar] = useState<Character | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCharacter();
+  }, [id]);
+
+  async function fetchCharacter() {
+    try {
+      const res = await fetch(`/api/characters/${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setChar(data.character || null);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="wrapin">
+        <Header active="renwu" />
+        <div className="in_com">
+          <p style={{ textAlign: "center", padding: 40 }}>加载中...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!char) {
     notFound();
