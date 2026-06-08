@@ -3,15 +3,22 @@ import { supabase, isSupabase } from "@/lib/supabase";
 
 async function initSupabase() {
   if (!isSupabase()) return;
-  // 检查 users 表是否存在
-  const { data, error } = await supabase!
-    .from("users")
-    .select("id")
-    .limit(1);
-  if (error && error.message.includes("does not exist")) {
-    throw new Error(
-      "Supabase 表未创建。请在 Supabase Dashboard → SQL Editor 中执行 supabase-init.sql 文件中的内容，然后重新部署。"
-    );
+  try {
+    const { error } = await supabase!
+      .from("users")
+      .select("id")
+      .limit(1);
+    if (error) {
+      if (error.message.includes("does not exist")) {
+        throw new Error(
+          "Supabase 表未创建。请在 Supabase Dashboard → SQL Editor 中执行 supabase-init.sql 文件中的内容。"
+        );
+      }
+      throw new Error("Supabase 连接失败: " + error.message);
+    }
+  } catch (e: any) {
+    if (e.message?.includes("表未创建")) throw e;
+    throw new Error("Supabase 初始化失败: " + (e.message || e));
   }
 }
 
