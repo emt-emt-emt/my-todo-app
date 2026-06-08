@@ -98,6 +98,17 @@ async function initPg() {
     trivias JSONB DEFAULT '[]'
   )`;
 
+  await s`CREATE TABLE IF NOT EXISTS arcs (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    name_jp VARCHAR(100),
+    volume_start INTEGER,
+    volume_end INTEGER,
+    summary TEXT NOT NULL,
+    characters JSONB DEFAULT '[]',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
   // 检查是否需要插入默认数据
   const { rows } = await s`SELECT COUNT(*) as count FROM users`;
   if (Number(rows[0].count) === 0) {
@@ -481,6 +492,30 @@ function mapCharacter(r: any): Character {
     trivias: typeof r.trivias === "string" ? JSON.parse(r.trivias) : (r.trivias || []),
   };
 }
+export interface Arc {
+  id: number;
+  name: string;
+  name_jp: string;
+  volume_start: number;
+  volume_end: number;
+  summary: string;
+  characters: string[];
+  created_at: string;
+}
+
+function mapArc(r: any): Arc {
+  return {
+    id: r.id,
+    name: r.name,
+    name_jp: r.name_jp || r.nameJp,
+    volume_start: r.volume_start || r.volumeStart,
+    volume_end: r.volume_end || r.volumeEnd,
+    summary: r.summary,
+    characters: typeof r.characters === "string" ? JSON.parse(r.characters) : (r.characters || []),
+    created_at: r.created_at || r.createdAt,
+  };
+}
+
 export const db = {
   users: {
     findAll: async () => {
@@ -1005,6 +1040,78 @@ export const db = {
       }
       initMemory();
       memoryCharacters = memoryCharacters.filter((c) => c.id !== id);
+    },
+  },
+  arcs: {
+    findAll: async () => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("arcs").select("*").order("volume_start");
+        if (error) throw error;
+        return (data || []).map(mapArc);
+      }
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM arcs ORDER BY volume_start`;
+        return rows.map(mapArc);
+      }
+      return [];
+    },
+    findById: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("arcs").select("*").eq("id", id).single();
+        if (error) return undefined;
+        return data ? mapArc(data) : undefined;
+      }
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM arcs WHERE id = ${id}`;
+        return rows.length ? mapArc(rows[0]) : undefined;
+      }
+      return undefined;
+    },
+    create: async (data: Omit<Arc, "id" | "created_at">) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("arcs")
+          .insert({
+            name: data.name,
+            name_jp: data.name_jp,
+            volume_start: data.volume_start,
+            volume_end: data.volume_end,
+            summary: data.summary,
+            characters: data.characters,
+          })
+          .select("id, created_at")
+          .single();
+        if (error) throw error;
+        return { ...data, id: inserted!.id, created_at: inserted!.created_at } as Arc;
+      }
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO arcs (name, name_jp, volume_start, volume_end, summary, characters)
+          VALUES (${data.name}, ${data.name_jp}, ${data.volume_start}, ${data.volume_end}, ${data.summary}, ${JSON.stringify(data.characters)})
+          RETURNING id, created_at
+        `;
+        return { ...data, id: rows[0].id, created_at: rows[0].created_at } as Arc;
+      }
+      return { ...data, id: 1, created_at: new Date().toISOString() } as Arc;
+    },
+    delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("arcs").delete().eq("id", id);
+        return;
+      }
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM arcs WHERE id = ${id}`;
+        return;
+      }
+      return;
     },
   },
 };

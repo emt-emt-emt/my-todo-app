@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AuthBar } from "./AuthBar";
 import { useAuth } from "./AuthProvider";
 
-export function Header({ active }: { active?: "home" | "renwu" | "tupian" | "forum" }) {
+export function Header({ active }: { active?: "home" | "renwu" | "tupian" | "forum" | "juqing" }) {
   const { user } = useAuth();
   return (
     <header className="clearfix">
@@ -25,6 +25,11 @@ export function Header({ active }: { active?: "home" | "renwu" | "tupian" | "for
         <li>
           <Link href="/tupian">
             {active === "tupian" ? <strong>图片鉴赏</strong> : "图片鉴赏"}
+          </Link>
+        </li>
+        <li>
+          <Link href="/juqing">
+            {active === "juqing" ? <strong>📖 剧情</strong> : "📖 剧情"}
           </Link>
         </li>
         <li>
