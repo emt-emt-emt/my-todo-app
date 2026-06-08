@@ -803,6 +803,12 @@ export const db = {
   },
   sections: {
     findAll: async () => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("sections").select("*");
+        if (error) throw error;
+        return (data || []).map(mapSection);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM sections`;
@@ -812,6 +818,16 @@ export const db = {
       return memorySections;
     },
     create: async (data: Omit<ImageSection, "id">) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("sections")
+          .insert({ name: data.name, description: data.description })
+          .select("id")
+          .single();
+        if (error) throw error;
+        return { ...data, id: inserted!.id } as ImageSection;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`
@@ -828,6 +844,11 @@ export const db = {
       return section as ImageSection;
     },
     delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("sections").delete().eq("id", id);
+        return;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM sections WHERE id = ${id}`;
@@ -839,6 +860,12 @@ export const db = {
   },
   images: {
     findAll: async () => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("images").select("*");
+        if (error) throw error;
+        return (data || []).map(mapImage);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM images`;
@@ -848,6 +875,12 @@ export const db = {
       return memoryImages;
     },
     findBySectionId: async (sectionId: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("images").select("*").eq("section_id", sectionId);
+        if (error) throw error;
+        return (data || []).map(mapImage);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM images WHERE section_id = ${sectionId}`;
@@ -857,6 +890,16 @@ export const db = {
       return memoryImages.filter((i) => i.sectionId === sectionId);
     },
     create: async (data: Omit<Image, "id" | "createdAt">) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("images")
+          .insert({ user_id: data.userId, username: data.username, section_id: data.sectionId, url: data.url, description: data.description })
+          .select("id, created_at")
+          .single();
+        if (error) throw error;
+        return { ...data, id: inserted!.id, createdAt: inserted!.created_at } as Image;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`
@@ -873,6 +916,11 @@ export const db = {
       return image as Image;
     },
     delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("images").delete().eq("id", id);
+        return;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM images WHERE id = ${id}`;
@@ -884,6 +932,12 @@ export const db = {
   },
   characters: {
     findAll: async () => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("characters").select("*");
+        if (error) throw error;
+        return (data || []).map(mapCharacter);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM characters`;
@@ -893,6 +947,12 @@ export const db = {
       return memoryCharacters;
     },
     findById: async (id: string) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("characters").select("*").eq("id", id).single();
+        if (error) return undefined;
+        return data ? mapCharacter(data) : undefined;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM characters WHERE id = ${id}`;
@@ -902,6 +962,24 @@ export const db = {
       return memoryCharacters.find((c) => c.id === id);
     },
     create: async (data: Omit<Character, "id"> & { id: string }) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { error } = await supabase!
+          .from("characters")
+          .insert({
+            id: data.id,
+            name: data.name,
+            name_jp: data.nameJp,
+            alias: data.alias,
+            image: data.image,
+            intro: data.intro,
+            info: data.info,
+            sections: data.sections,
+            trivias: data.trivias,
+          });
+        if (error) throw error;
+        return data as Character;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`
@@ -915,6 +993,11 @@ export const db = {
       return data as Character;
     },
     delete: async (id: string) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("characters").delete().eq("id", id);
+        return;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM characters WHERE id = ${id}`;
