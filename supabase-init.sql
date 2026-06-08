@@ -179,6 +179,16 @@ INSERT INTO characters (id, name, name_jp, alias, image, intro, info, sections, 
 ')
 ON CONFLICT (id) DO NOTHING;
 
+-- 9. 剧情篇章讨论表
+CREATE TABLE IF NOT EXISTS arc_comments (
+  id SERIAL PRIMARY KEY,
+  arc_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  username VARCHAR(20) NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- ============================================
 -- RLS 权限
 -- ============================================
@@ -189,6 +199,8 @@ ALTER TABLE replies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sections ENABLE ROW LEVEL SECURITY;
 ALTER TABLE images ENABLE ROW LEVEL SECURITY;
 ALTER TABLE characters ENABLE ROW LEVEL SECURITY;
+ALTER TABLE arcs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE arc_comments ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY IF NOT EXISTS "users_all" ON users FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY IF NOT EXISTS "posts_all" ON posts FOR ALL USING (true) WITH CHECK (true);
@@ -197,8 +209,8 @@ CREATE POLICY IF NOT EXISTS "replies_all" ON replies FOR ALL USING (true) WITH C
 CREATE POLICY IF NOT EXISTS "sections_all" ON sections FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY IF NOT EXISTS "images_all" ON images FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY IF NOT EXISTS "characters_all" ON characters FOR ALL USING (true) WITH CHECK (true);
-ALTER TABLE arcs ENABLE ROW LEVEL SECURITY;
 CREATE POLICY IF NOT EXISTS "arcs_all" ON arcs FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS "arc_comments_all" ON arc_comments FOR ALL USING (true) WITH CHECK (true);
 
 -- 验证
 SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename;

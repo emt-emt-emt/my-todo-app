@@ -39,6 +39,7 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
 
   useEffect(() => {
     fetchArc();
+    fetchComments();
   }, [arcId]);
 
   async function fetchArc() {
@@ -55,6 +56,18 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
     }
   }
 
+  async function fetchComments() {
+    try {
+      const res = await fetch(`/api/arc-comments?arcId=${arcId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setComments(data.comments || []);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim()) return;
@@ -68,7 +81,7 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
       });
       if (res.ok) {
         setContent("");
-        fetchArc();
+        fetchComments();
       } else {
         const data = await res.json();
         alert(data.error || "发送失败");

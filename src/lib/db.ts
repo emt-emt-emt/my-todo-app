@@ -109,6 +109,15 @@ async function initPg() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`;
 
+  await s`CREATE TABLE IF NOT EXISTS arc_comments (
+    id SERIAL PRIMARY KEY,
+    arc_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    username VARCHAR(20) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`;
+
   // 检查是否需要插入默认数据
   const { rows } = await s`SELECT COUNT(*) as count FROM users`;
   if (Number(rows[0].count) === 0) {
@@ -1109,6 +1118,57 @@ export const db = {
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM arcs WHERE id = ${id}`;
+        return;
+      }
+      return;
+    },
+  },
+  arc_comments: {
+    findByArcId: async (arcId: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("arc_comments").select("*").eq("arc_id", arcId).order("created_at");
+        if (error) throw error;
+        return (data || []).map((r: any) => ({ id: r.id, username: r.username, content: r.content, createdAt: r.created_at }));
+      }
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`SELECT * FROM arc_comments WHERE arc_id = ${arcId} ORDER BY created_at`;
+        return rows.map((r: any) => ({ id: r.id, username: r.username, content: r.content, createdAt: r.created_at }));
+      }
+      return [];
+    },
+    create: async (data: { arcId: number; userId: number; username: string; content: string }) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("arc_comments")
+          .insert({ arc_id: data.arcId, user_id: data.userId, username: data.username, content: data.content })
+          .select("id, created_at")
+          .single();
+        if (error) throw error;
+        return { id: inserted!.id, username: data.username, content: data.content, createdAt: inserted!.created_at };
+      }
+      if (isPg()) {
+        await initPg();
+        const { rows } = await (await getSql())`
+          INSERT INTO arc_comments (arc_id, user_id, username, content)
+          VALUES (${data.arcId}, ${data.userId}, ${data.username}, ${data.content})
+          RETURNING id, created_at
+        `;
+        return { id: rows[0].id, username: data.username, content: data.content, createdAt: rows[0].created_at };
+      }
+      return { id: 1, username: data.username, content: data.content, createdAt: new Date().toISOString() };
+    },
+    delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("arc_comments").delete().eq("id", id);
+        return;
+      }
+      if (isPg()) {
+        await initPg();
+        await (await getSql())`DELETE FROM arc_comments WHERE id = ${id}`;
         return;
       }
       return;
