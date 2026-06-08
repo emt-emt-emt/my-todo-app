@@ -1,4 +1,19 @@
 import { z } from "zod";
+import { supabase, isSupabase } from "@/lib/supabase";
+
+async function initSupabase() {
+  if (!isSupabase()) return;
+  // 检查 users 表是否存在
+  const { data, error } = await supabase!
+    .from("users")
+    .select("id")
+    .limit(1);
+  if (error && error.message.includes("does not exist")) {
+    throw new Error(
+      "Supabase 表未创建。请在 Supabase Dashboard → SQL Editor 中执行 supabase-init.sql 文件中的内容，然后重新部署。"
+    );
+  }
+}
 
 // ========== Postgres 支持 ==========
 let sql: any = null;
@@ -469,6 +484,12 @@ function mapCharacter(r: any): Character {
 export const db = {
   users: {
     findAll: async () => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("users").select("*").eq("banned", false);
+        if (error) throw error;
+        return (data || []).map(mapUser);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM users WHERE banned = false`;
@@ -478,6 +499,12 @@ export const db = {
       return memoryUsers.filter((u) => !u.banned);
     },
     findById: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("users").select("*").eq("id", id).eq("banned", false).single();
+        if (error) return undefined;
+        return data ? mapUser(data) : undefined;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM users WHERE id = ${id} AND banned = false`;
@@ -487,6 +514,12 @@ export const db = {
       return memoryUsers.find((u) => u.id === id && !u.banned);
     },
     findByUsername: async (username: string) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("users").select("*").eq("username", username).single();
+        if (error) return undefined;
+        return data ? mapUser(data) : undefined;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM users WHERE username = ${username}`;
@@ -496,6 +529,16 @@ export const db = {
       return memoryUsers.find((u) => u.username === username);
     },
     create: async (data: Omit<User, "id" | "createdAt">) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("users")
+          .insert({ username: data.username, password: data.password, role: data.role, banned: data.banned, avatar: data.avatar || null })
+          .select("id, created_at")
+          .single();
+        if (error) throw error;
+        return { ...data, id: inserted!.id, createdAt: inserted!.created_at } as User;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`
@@ -512,6 +555,17 @@ export const db = {
       return user as User;
     },
     update: async (id: number, data: Partial<User>) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const updateData: any = {};
+        if (data.banned !== undefined) updateData.banned = data.banned;
+        if (data.password !== undefined) updateData.password = data.password;
+        if (data.role !== undefined) updateData.role = data.role;
+        if (data.avatar !== undefined) updateData.avatar = data.avatar;
+        const { data: updated, error } = await supabase!.from("users").update(updateData).eq("id", id).select("*").single();
+        if (error) throw error;
+        return updated ? mapUser(updated) : undefined;
+      }
       if (isPg()) {
         await initPg();
         if (data.banned !== undefined)
@@ -529,6 +583,11 @@ export const db = {
       return memoryUsers[idx];
     },
     delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("users").delete().eq("id", id);
+        return;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM users WHERE id = ${id}`;
@@ -540,6 +599,12 @@ export const db = {
   },
   comments: {
     findAll: async () => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("comments").select("*");
+        if (error) throw error;
+        return (data || []).map(mapComment);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM comments`;
@@ -549,6 +614,12 @@ export const db = {
       return memoryComments;
     },
     findByCharacterId: async (characterId: string) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("comments").select("*").eq("character_id", characterId).order("created_at", { ascending: false });
+        if (error) throw error;
+        return (data || []).map(mapComment);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM comments WHERE character_id = ${characterId} ORDER BY created_at DESC`;
@@ -558,6 +629,16 @@ export const db = {
       return memoryComments.filter((c) => c.characterId === characterId).reverse();
     },
     create: async (data: Omit<Comment, "id" | "createdAt">) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("comments")
+          .insert({ user_id: data.userId, username: data.username, character_id: data.characterId, content: data.content })
+          .select("id, created_at")
+          .single();
+        if (error) throw error;
+        return { ...data, id: inserted!.id, createdAt: inserted!.created_at } as Comment;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`
@@ -574,6 +655,11 @@ export const db = {
       return comment as Comment;
     },
     delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("comments").delete().eq("id", id);
+        return;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM comments WHERE id = ${id}`;
@@ -585,6 +671,12 @@ export const db = {
   },
   posts: {
     findAll: async () => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("posts").select("*").order("created_at", { ascending: false });
+        if (error) throw error;
+        return (data || []).map(mapPost);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM posts ORDER BY created_at DESC`;
@@ -594,6 +686,12 @@ export const db = {
       return [...memoryPosts].reverse();
     },
     findById: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("posts").select("*").eq("id", id).single();
+        if (error) return undefined;
+        return data ? mapPost(data) : undefined;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM posts WHERE id = ${id}`;
@@ -603,6 +701,16 @@ export const db = {
       return memoryPosts.find((p) => p.id === id);
     },
     create: async (data: Omit<Post, "id" | "createdAt">) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("posts")
+          .insert({ user_id: data.userId, username: data.username, title: data.title, content: data.content })
+          .select("id, created_at")
+          .single();
+        if (error) throw error;
+        return { ...data, id: inserted!.id, createdAt: inserted!.created_at } as Post;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`
@@ -619,6 +727,12 @@ export const db = {
       return post as Post;
     },
     delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("replies").delete().eq("post_id", id);
+        await supabase!.from("posts").delete().eq("id", id);
+        return;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM posts WHERE id = ${id}`;
@@ -632,6 +746,12 @@ export const db = {
   },
   replies: {
     findByPostId: async (postId: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data, error } = await supabase!.from("replies").select("*").eq("post_id", postId).order("created_at");
+        if (error) throw error;
+        return (data || []).map(mapReply);
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM replies WHERE post_id = ${postId} ORDER BY created_at`;
@@ -641,6 +761,16 @@ export const db = {
       return memoryReplies.filter((r) => r.postId === postId);
     },
     create: async (data: Omit<Reply, "id" | "createdAt">) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const { data: inserted, error } = await supabase!
+          .from("replies")
+          .insert({ post_id: data.postId, user_id: data.userId, username: data.username, content: data.content })
+          .select("id, created_at")
+          .single();
+        if (error) throw error;
+        return { ...data, id: inserted!.id, createdAt: inserted!.created_at } as Reply;
+      }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`
@@ -657,6 +787,11 @@ export const db = {
       return reply as Reply;
     },
     delete: async (id: number) => {
+      if (isSupabase()) {
+        await initSupabase();
+        await supabase!.from("replies").delete().eq("id", id);
+        return;
+      }
       if (isPg()) {
         await initPg();
         await (await getSql())`DELETE FROM replies WHERE id = ${id}`;
