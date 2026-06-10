@@ -245,71 +245,85 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
 
           {editing ? (
             <div style={{ marginTop: 20 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
-                <div>
-                  <label>中文名</label>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
-                  />
-                </div>
-                <div>
-                  <label>日文名</label>
-                  <input
-                    type="text"
-                    value={editNameJp}
-                    onChange={(e) => setEditNameJp(e.target.value)}
-                    style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
-                  />
-                </div>
+              <div className="edit-form-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, paddingBottom: 12, borderBottom: "2px solid #598bd2" }}>
+                <h3 style={{ margin: 0, fontSize: 18, color: "#333" }}>✏️ 编辑篇章</h3>
+                <span style={{ fontSize: 12, color: "#999" }}>admin 专用</span>
               </div>
-              <div style={{ marginBottom: 10 }}>
-                <label>简介</label>
+
+              <div className="edit-group" style={{ marginBottom: 18 }}>
+                <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📛 中文名</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
+                  placeholder="如：王选篇"
+                />
+              </div>
+
+              <div className="edit-group" style={{ marginBottom: 18 }}>
+                <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>🇯🇵 日文名</label>
+                <input
+                  type="text"
+                  value={editNameJp}
+                  onChange={(e) => setEditNameJp(e.target.value)}
+                  style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
+                  placeholder="如：王選編"
+                />
+              </div>
+
+              <div className="edit-group" style={{ marginBottom: 18 }}>
+                <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📝 简介</label>
                 <textarea
                   value={editSummary}
                   onChange={(e) => setEditSummary(e.target.value)}
-                  rows={8}
-                  style={{ width: "100%", padding: 10, borderRadius: 4, border: "1px solid #ccc" }}
+                  rows={10}
+                  style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 14, lineHeight: 1.6, resize: "vertical" }}
+                  placeholder="剧情简介..."
                 />
               </div>
-              <div style={{ marginBottom: 10 }}>
-                <label>出场角色（逗号分隔）</label>
+
+              <div className="edit-group" style={{ marginBottom: 18 }}>
+                <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>👥 出场角色（逗号分隔）</label>
+                <div style={{ fontSize: 12, color: "#999", marginBottom: 6 }}>输入角色名，用逗号分隔，如：菜月昴, 爱蜜莉雅, 雷姆</div>
                 <input
                   type="text"
                   value={editCharacters}
                   onChange={(e) => setEditCharacters(e.target.value)}
-                  style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                  style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
                 />
               </div>
-              <div style={{ display: "flex", gap: 10 }}>
+
+              <div className="edit-actions" style={{ display: "flex", gap: 12, paddingTop: 12, borderTop: "1px solid #eee" }}>
                 <button
                   onClick={saveEdit}
                   disabled={saving}
                   style={{
-                    padding: "6px 16px",
+                    padding: "10px 24px",
                     background: "#27ae60",
                     color: "#fff",
                     border: "none",
-                    borderRadius: 4,
+                    borderRadius: 6,
                     cursor: saving ? "not-allowed" : "pointer",
+                    fontSize: 14,
+                    fontWeight: "bold",
                   }}
                 >
-                  {saving ? "保存中..." : "💾 保存"}
+                  {saving ? "💾 保存中..." : "💾 保存修改"}
                 </button>
                 <button
                   onClick={() => setEditing(false)}
                   style={{
-                    padding: "6px 16px",
-                    background: "#999",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: 4,
+                    padding: "10px 24px",
+                    background: "#f0f0f0",
+                    color: "#666",
+                    border: "1px solid #ddd",
+                    borderRadius: 6,
                     cursor: "pointer",
+                    fontSize: 14,
                   }}
                 >
-                  取消
+                  ❌ 取消
                 </button>
               </div>
             </div>

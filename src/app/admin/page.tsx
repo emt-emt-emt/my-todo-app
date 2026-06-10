@@ -355,77 +355,89 @@ export default function AdminPage() {
             </div>
 
             {editingArc && (
-              <div style={{ background: "#f8f9fa", padding: 20, borderRadius: 8, marginBottom: 20 }}>
-                <h3>{editingArc.id ? "编辑剧情" : "新增剧情"}</h3>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+              <div style={{ background: "#f8f9fa", padding: 20, borderRadius: 8, marginBottom: 20, border: "1px solid #e0e0e0" }}>
+                <div className="edit-form-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, paddingBottom: 12, borderBottom: "2px solid #598bd2" }}>
+                  <h3 style={{ margin: 0, fontSize: 18, color: "#333" }}>{editingArc.id ? "✏️ 编辑剧情" : "➕ 新增剧情"}</h3>
+                  <button
+                    onClick={() => setEditingArc(null)}
+                    style={{ background: "none", border: "none", fontSize: 20, cursor: "pointer", color: "#999" }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 15, marginBottom: 18 }}>
                   <div>
-                    <label>中文名</label>
+                    <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📛 中文名</label>
                     <input
                       type="text"
                       value={editingArc.name}
                       onChange={(e) => setEditingArc({ ...editingArc, name: e.target.value })}
-                      style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                      style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
                       placeholder="如：王选篇"
                     />
                   </div>
                   <div>
-                    <label>日文名</label>
+                    <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>🇯🇵 日文名</label>
                     <input
                       type="text"
                       value={editingArc.name_jp}
                       onChange={(e) => setEditingArc({ ...editingArc, name_jp: e.target.value })}
-                      style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                      style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
                       placeholder="如：王選編"
                     />
                   </div>
                   <div>
-                    <label>起始卷</label>
+                    <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📖 起始卷</label>
                     <input
                       type="number"
                       value={editingArc.volume_start}
                       onChange={(e) => setEditingArc({ ...editingArc, volume_start: Number(e.target.value) })}
-                      style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                      style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
                     />
                   </div>
                   <div>
-                    <label>结束卷</label>
+                    <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📖 结束卷</label>
                     <input
                       type="number"
                       value={editingArc.volume_end}
                       onChange={(e) => setEditingArc({ ...editingArc, volume_end: Number(e.target.value) })}
-                      style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                      style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
                     />
                   </div>
                 </div>
-                <div style={{ marginBottom: 10 }}>
-                  <label>简介</label>
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📝 简介</label>
                   <textarea
                     value={editingArc.summary}
                     onChange={(e) => setEditingArc({ ...editingArc, summary: e.target.value })}
-                    style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc", minHeight: 80 }}
+                    style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 14, lineHeight: 1.6, minHeight: 80, resize: "vertical" }}
                     placeholder="剧情简介..."
                   />
                 </div>
-                <div style={{ marginBottom: 10 }}>
-                  <label>出场角色（逗号分隔）</label>
+                <div style={{ marginBottom: 18 }}>
+                  <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>👥 出场角色（逗号分隔）</label>
+                  <div style={{ fontSize: 12, color: "#999", marginBottom: 6 }}>输入角色名，用逗号分隔，如：菜月昴, 爱蜜莉雅, 雷姆</div>
                   <input
                     type="text"
                     value={editingArc.characters}
                     onChange={(e) => setEditingArc({ ...editingArc, characters: e.target.value })}
-                    style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                    style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #ddd", fontSize: 14 }}
                     placeholder="菜月昴, 爱蜜莉雅, 雷姆..."
                   />
                 </div>
-                <div style={{ display: "flex", gap: 10 }}>
+                <div style={{ display: "flex", gap: 12, paddingTop: 12, borderTop: "1px solid #eee" }}>
                   <button
                     onClick={saveArc}
                     style={{
-                      padding: "6px 16px",
-                      background: "#598bd2",
+                      padding: "10px 24px",
+                      background: "#27ae60",
                       color: "#fff",
                       border: "none",
-                      borderRadius: 4,
+                      borderRadius: 6,
                       cursor: "pointer",
+                      fontSize: 14,
+                      fontWeight: "bold",
                     }}
                   >
                     💾 保存
@@ -433,15 +445,16 @@ export default function AdminPage() {
                   <button
                     onClick={() => setEditingArc(null)}
                     style={{
-                      padding: "6px 16px",
-                      background: "#999",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 4,
+                      padding: "10px 24px",
+                      background: "#f0f0f0",
+                      color: "#666",
+                      border: "1px solid #ddd",
+                      borderRadius: 6,
                       cursor: "pointer",
+                      fontSize: 14,
                     }}
                   >
-                    取消
+                    ❌ 取消
                   </button>
                 </div>
               </div>

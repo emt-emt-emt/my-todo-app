@@ -178,71 +178,86 @@ export default function CharacterPage({ params }: CharacterPageProps) {
 
           <div className="char_main">
             {editing ? (
-              <div style={{ background: "#f8f9fa", padding: 20, borderRadius: 8, marginBottom: 20 }}>
-                <h3>编辑角色</h3>
-                <div style={{ marginBottom: 10 }}>
-                  <label>简介</label>
+              <div className="edit-form-wrap" style={{ flex: 1 }}>
+                <div className="edit-form-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, paddingBottom: 12, borderBottom: "2px solid #598bd2" }}>
+                  <h3 style={{ margin: 0, fontSize: 18, color: "#333" }}>✏️ 编辑角色</h3>
+                  <span style={{ fontSize: 12, color: "#999" }}>admin 专用</span>
+                </div>
+
+                <div className="edit-group" style={{ marginBottom: 18 }}>
+                  <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📝 简介</label>
                   <textarea
                     value={editIntro}
                     onChange={(e) => setEditIntro(e.target.value)}
-                    rows={6}
-                    style={{ width: "100%", padding: 10, borderRadius: 4, border: "1px solid #ccc" }}
+                    rows={5}
+                    style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 14, lineHeight: 1.6, resize: "vertical" }}
+                    placeholder="角色简介..."
                   />
                 </div>
-                <div style={{ marginBottom: 10 }}>
-                  <label>信息（info JSON）</label>
+
+                <div className="edit-group" style={{ marginBottom: 18 }}>
+                  <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📋 角色信息（JSON）</label>
+                  <div style={{ fontSize: 12, color: "#999", marginBottom: 6 }}>{"格式：{\"年龄\": \"17岁\", \"生日\": \"4月1日\"}"}</div>
                   <textarea
                     value={editInfo}
                     onChange={(e) => setEditInfo(e.target.value)}
                     rows={8}
-                    style={{ width: "100%", padding: 10, borderRadius: 4, border: "1px solid #ccc", fontFamily: "monospace" }}
+                    style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 13, fontFamily: "monospace", lineHeight: 1.5, resize: "vertical", background: "#fafbfc" }}
                   />
                 </div>
-                <div style={{ marginBottom: 10 }}>
-                  <label>章节（sections JSON 数组）</label>
+
+                <div className="edit-group" style={{ marginBottom: 18 }}>
+                  <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>📖 章节（JSON 数组）</label>
+                  <div style={{ fontSize: 12, color: "#999", marginBottom: 6 }}>{"格式：[{\"title\":\"...\",\"content\":\"...\"}]"}</div>
                   <textarea
                     value={editSections}
                     onChange={(e) => setEditSections(e.target.value)}
                     rows={8}
-                    style={{ width: "100%", padding: 10, borderRadius: 4, border: "1px solid #ccc", fontFamily: "monospace" }}
+                    style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 13, fontFamily: "monospace", lineHeight: 1.5, resize: "vertical", background: "#fafbfc" }}
                   />
                 </div>
-                <div style={{ marginBottom: 10 }}>
-                  <label>趣闻（trivias JSON 数组）</label>
+
+                <div className="edit-group" style={{ marginBottom: 18 }}>
+                  <label style={{ display: "block", fontWeight: "bold", color: "#333", marginBottom: 6, fontSize: 14 }}>🎓 趣闻（JSON 数组）</label>
+                  <div style={{ fontSize: 12, color: "#999", marginBottom: 6 }}>格式：["趣闻1", "趣闻2"]</div>
                   <textarea
                     value={editTrivias}
                     onChange={(e) => setEditTrivias(e.target.value)}
                     rows={6}
-                    style={{ width: "100%", padding: 10, borderRadius: 4, border: "1px solid #ccc", fontFamily: "monospace" }}
+                    style={{ width: "100%", padding: 12, borderRadius: 6, border: "1px solid #ddd", fontSize: 13, fontFamily: "monospace", lineHeight: 1.5, resize: "vertical", background: "#fafbfc" }}
                   />
                 </div>
-                <div style={{ display: "flex", gap: 10 }}>
+
+                <div className="edit-actions" style={{ display: "flex", gap: 12, paddingTop: 12, borderTop: "1px solid #eee" }}>
                   <button
                     onClick={saveEdit}
                     disabled={saving}
                     style={{
-                      padding: "6px 16px",
+                      padding: "10px 24px",
                       background: "#27ae60",
                       color: "#fff",
                       border: "none",
-                      borderRadius: 4,
+                      borderRadius: 6,
                       cursor: saving ? "not-allowed" : "pointer",
+                      fontSize: 14,
+                      fontWeight: "bold",
                     }}
                   >
-                    {saving ? "保存中..." : "💾 保存"}
+                    {saving ? "💾 保存中..." : "💾 保存修改"}
                   </button>
                   <button
                     onClick={() => setEditing(false)}
                     style={{
-                      padding: "6px 16px",
-                      background: "#999",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 4,
+                      padding: "10px 24px",
+                      background: "#f0f0f0",
+                      color: "#666",
+                      border: "1px solid #ddd",
+                      borderRadius: 6,
                       cursor: "pointer",
+                      fontSize: 14,
                     }}
                   >
-                    取消
+                    ❌ 取消
                   </button>
                 </div>
               </div>
