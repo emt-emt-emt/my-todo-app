@@ -27,6 +27,9 @@ export async function PATCH(req: NextRequest) {
     const { id, banned } = body;
     if (!id) return NextResponse.json({ error: "缺少参数" }, { status: 400 });
 
+    // 禁止禁言自己
+    if (id === payload.userId) return NextResponse.json({ error: "不能禁言自己" }, { status: 400 });
+
     await db.users.update(id, { banned });
     return NextResponse.json({ success: true });
   } catch {

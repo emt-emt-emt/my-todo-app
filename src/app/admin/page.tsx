@@ -354,65 +354,53 @@ export default function AdminPage() {
                           </span>
                         </td>
                         <td style={{ padding: "14px 12px" }}>
-                          {/* 滑动开关 */}
-                          <div
-                            onClick={() => toggleBan(u.id, u.banned)}
-                            style={{
-                              width: 44,
-                              height: 24,
-                              borderRadius: 12,
-                              background: u.banned ? "#e74c3c" : "#27ae60",
-                              cursor: "pointer",
-                              position: "relative",
-                              transition: "background 0.3s ease",
-                              flexShrink: 0,
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: 20,
-                                height: 20,
-                                borderRadius: "50%",
-                                background: "#fff",
-                                position: "absolute",
-                                top: 2,
-                                left: u.banned ? 2 : 22,
-                                transition: "left 0.3s ease",
-                                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                          {user?.id === u.id ? (
+                            <span style={{ fontSize: 12, color: "#999" }}>—</span>
+                          ) : (
+                            <>
+                              <div
+                                onClick={() => toggleBan(u.id, u.banned)}
+                                style={{
+                                  width: 44,
+                                  height: 24,
+                                  borderRadius: 12,
+                                  background: u.banned ? "#e74c3c" : "#27ae60",
+                                  cursor: "pointer",
+                                  position: "relative",
+                                  transition: "background 0.3s ease",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width: 20,
+                                    height: 20,
+                                    borderRadius: "50%",
+                                    background: "#fff",
+                                    position: "absolute",
+                                    top: 2,
+                                    left: u.banned ? 2 : 22,
+                                    transition: "left 0.3s ease",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                                  }}
+                                />
+                              </div>
+                              <span style={{
+                                fontSize: 12,
+                                color: u.banned ? "#e74c3c" : "#27ae60",
+                                fontWeight: 500,
+                                marginLeft: 8,
                               }}
-                            />
-                          </div>
-                          <span style={{
-                            fontSize: 12,
-                            color: u.banned ? "#e74c3c" : "#27ae60",
-                            fontWeight: 500,
-                            marginLeft: 8,
-                          }}
-                          >
-                            {u.banned ? "已禁言" : "正常"}
-                          </span>
+                              >
+                                {u.banned ? "已禁言" : "正常"}
+                              </span>
+                            </>
+                          )}
                         </td>
                         <td style={{ padding: "14px 12px", color: "#999", fontSize: 13 }}>
                           {new Date(u.createdAt).toLocaleString("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })}
                         </td>
                         <td style={{ padding: "14px 12px" }}>
-                          <button
-                            onClick={() => toggleBan(u.id, u.banned)}
-                            style={{
-                              padding: "6px 12px",
-                              background: u.banned ? "#dcfce7" : "#fef2f2",
-                              color: u.banned ? "#16a34a" : "#e74c3c",
-                              border: "none",
-                              borderRadius: 6,
-                              cursor: "pointer",
-                              fontSize: 12,
-                              fontWeight: 500,
-                              marginRight: 8,
-                              transition: "all 0.2s",
-                            }}
-                          >
-                            {u.banned ? "✅ 解除" : "🚫 禁言"}
-                          </button>
                           {u.role !== "admin" && (
                             <button
                               onClick={() => deleteUser(u.id)}
