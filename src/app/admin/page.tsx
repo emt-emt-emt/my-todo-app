@@ -354,20 +354,41 @@ export default function AdminPage() {
                           </span>
                         </td>
                         <td style={{ padding: "14px 12px" }}>
+                          {/* 滑动开关 */}
+                          <div
+                            onClick={() => toggleBan(u.id, u.banned)}
+                            style={{
+                              width: 44,
+                              height: 24,
+                              borderRadius: 12,
+                              background: u.banned ? "#e74c3c" : "#27ae60",
+                              cursor: "pointer",
+                              position: "relative",
+                              transition: "background 0.3s ease",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 20,
+                                height: 20,
+                                borderRadius: "50%",
+                                background: "#fff",
+                                position: "absolute",
+                                top: 2,
+                                left: u.banned ? 2 : 22,
+                                transition: "left 0.3s ease",
+                                boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                              }}
+                            />
+                          </div>
                           <span style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 4,
+                            fontSize: 12,
                             color: u.banned ? "#e74c3c" : "#27ae60",
                             fontWeight: 500,
-                          }}>
-                            <span style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              background: u.banned ? "#e74c3c" : "#27ae60",
-                              display: "inline-block",
-                            }} />
+                            marginLeft: 8,
+                          }}
+                          >
                             {u.banned ? "已禁言" : "正常"}
                           </span>
                         </td>
