@@ -14,6 +14,7 @@ interface User {
 
 interface Comment {
   id: number;
+  userId: number;
   username: string;
   characterId: string;
   content: string;
@@ -122,6 +123,14 @@ export default function AdminPage() {
     }
   }
 
+  const [userBannedMap, setUserBannedMap] = useState<Map<number, boolean>>(new Map());
+
+  useEffect(() => {
+    const map = new Map<number, boolean>();
+    users.forEach(u => map.set(u.id, u.banned));
+    setUserBannedMap(map);
+  }, [users]);
+
   async function toggleBan(id: number, banned: boolean) {
     try {
       const res = await fetch("/api/admin/users", {
@@ -134,6 +143,11 @@ export default function AdminPage() {
     } catch {
       alert("操作失败");
     }
+  }
+
+  async function banUserFromComment(userId: number) {
+    const banned = userBannedMap.get(userId) || false;
+    await toggleBan(userId, banned);
   }
 
   async function deleteUser(id: number) {
@@ -459,6 +473,36 @@ export default function AdminPage() {
                           }}
                         >
                           🗑️ 删除
+                        </button>
+                        <button
+                          onClick={() => banUserFromComment(c.userId)}
+                          style={{
+                            padding: "6px 12px",
+                            background: userBannedMap.get(c.userId) ? "#dcfce7" : "#fef2f2",
+                            color: userBannedMap.get(c.userId) ? "#16a34a" : "#e74c3c",
+                            border: "none",
+                            borderRadius: 6,
+                            cursor: "pointer",
+                            fontSize: 12,
+                            fontWeight: 500,
+                            whiteSpace: "nowrap",
+                            transition: "all 0.2s",
+                            marginTop: 6,
+                          }}
+                          onMouseEnter={(e) => {
+                            if (userBannedMap.get(c.userId)) {
+                              e.currentTarget.style.background = "#16a34a";
+                            } else {
+                              e.currentTarget.style.background = "#e74c3c";
+                            }
+                            e.currentTarget.style.color = "#fff";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = userBannedMap.get(c.userId) ? "#dcfce7" : "#fef2f2";
+                            e.currentTarget.style.color = userBannedMap.get(c.userId) ? "#16a34a" : "#e74c3c";
+                          }}
+                        >
+                          {userBannedMap.get(c.userId) ? "✅ 解除禁言" : "🚫 禁言用户"}
                         </button>
                       </div>
                     </div>
