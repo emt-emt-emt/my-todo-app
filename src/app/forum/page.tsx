@@ -22,7 +22,7 @@ export default function ForumPage() {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchPosts = useCallback(async () => {
+  async function fetchPosts() {
     try {
       const res = await fetch("/api/posts");
       if (res.ok) {
@@ -34,11 +34,29 @@ export default function ForumPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }
 
   useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+    let cancelled = false;
+
+    async function fetchData() {
+      try {
+        const res = await fetch("/api/posts");
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          setPosts(data.posts || []);
+        }
+      } catch {
+        // ignore
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    fetchData();
+
+    return () => { cancelled = true; };
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

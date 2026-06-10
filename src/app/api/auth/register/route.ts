@@ -27,8 +27,9 @@ export async function POST(req: NextRequest) {
       success: true,
       user: { id: user.id, username: user.username, role: user.role },
     });
-  } catch (e: any) {
+  } catch (e) {
     console.error("[register error]", e);
-    return NextResponse.json({ error: "服务器错误: " + (e.message || e) }, { status: 500 });
+    const message = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ error: "服务器错误: " + message }, { status: 500 });
   }
 }

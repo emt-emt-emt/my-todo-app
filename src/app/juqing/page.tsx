@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "../../components/Header";
-import { useAuth } from "../../components/AuthProvider";
 
 interface Arc {
   id: number;
@@ -16,27 +15,27 @@ interface Arc {
 }
 
 export default function JuqingPage() {
-  const { user } = useAuth();
   const [arcs, setArcs] = useState<Arc[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchArcs = useCallback(async () => {
-    try {
-      const res = await fetch("/api/arcs");
-      if (res.ok) {
-        const data = await res.json();
-        setArcs(data.arcs || []);
-      }
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    fetchArcs();
-  }, [fetchArcs]);
+    let cancelled = false;
+
+    fetch("/api/arcs")
+      .then(res => {
+        if (!res.ok || cancelled) return null;
+        return res.json();
+      })
+      .then(data => {
+        if (data && !cancelled) setArcs(data.arcs || []);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <div className="wrapin">

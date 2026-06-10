@@ -17,7 +17,23 @@ export function CommentSection({ characterId }: { characterId: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const fetchComments = useCallback(async () => {
+  useEffect(() => {
+    let cancelled = false;
+
+    fetch(`/api/comments?characterId=${characterId}`)
+      .then(res => {
+        if (!res.ok || cancelled) return null;
+        return res.json();
+      })
+      .then(data => {
+        if (data && !cancelled) setComments(data.comments || []);
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [characterId]);
+
+  async function fetchComments() {
     try {
       const res = await fetch(`/api/comments?characterId=${characterId}`);
       if (res.ok) {
@@ -27,11 +43,7 @@ export function CommentSection({ characterId }: { characterId: string }) {
     } catch {
       // ignore
     }
-  }, [characterId]);
-
-  useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -16,13 +16,15 @@ async function initSupabase() {
       }
       throw new Error("Supabase 连接失败: " + error.message);
     }
-  } catch (e: any) {
-    if (e.message?.includes("表未创建")) throw e;
-    throw new Error("Supabase 初始化失败: " + (e.message || e));
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    if (message.includes("表未创建")) throw e;
+    throw new Error("Supabase 初始化失败: " + message);
   }
 }
 
 // ========== Postgres 支持 ==========
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let sql: any = null;
 let pgReady = false;
 
@@ -129,7 +131,7 @@ async function initPg() {
   const { rows } = await s`SELECT COUNT(*) as count FROM users`;
   if (Number(rows[0].count) === 0) {
     const bcrypt = await import("bcryptjs");
-    const adminHash = bcrypt.hashSync("admin123", 10);
+    const adminHash = bcrypt.hashSync("1234", 10);
 
     await s`INSERT INTO users (username, password, role, banned) VALUES ('admin', ${adminHash}, 'admin', false)`;
 
@@ -161,7 +163,7 @@ let memoryPosts: Post[] = [];
 let memoryReplies: Reply[] = [];
 let memoryImages: Image[] = [];
 let memorySections: ImageSection[] = [];
-let memoryIdCounters = { user: 1, comment: 0, post: 0, reply: 0, image: 6, section: 3 };
+const memoryIdCounters = { user: 1, comment: 0, post: 0, reply: 0, image: 6, section: 3 };
 let memoryCharacters: Character[] = [];
 
 function initMemory() {
@@ -439,73 +441,73 @@ export interface Character {
 }
 
 // 映射函数
-function mapUser(r: any): User {
+function mapUser(r: Record<string, unknown>): User {
   return {
-    id: r.id,
-    username: r.username,
-    password: r.password,
-    role: r.role,
-    banned: r.banned,
-    avatar: r.avatar,
-    createdAt: r.created_at || r.createdAt,
+    id: r.id as number,
+    username: r.username as string,
+    password: r.password as string,
+    role: r.role as "admin" | "user",
+    banned: r.banned as boolean,
+    avatar: r.avatar as string | undefined,
+    createdAt: (r.created_at || r.createdAt) as string,
   };
 }
-function mapComment(r: any): Comment {
+function mapComment(r: Record<string, unknown>): Comment {
   return {
-    id: r.id,
-    userId: r.user_id || r.userId,
-    username: r.username,
-    characterId: r.character_id || r.characterId,
-    content: r.content,
-    createdAt: r.created_at || r.createdAt,
+    id: r.id as number,
+    userId: (r.user_id || r.userId) as number,
+    username: r.username as string,
+    characterId: (r.character_id || r.characterId) as string,
+    content: r.content as string,
+    createdAt: (r.created_at || r.createdAt) as string,
   };
 }
-function mapPost(r: any): Post {
+function mapPost(r: Record<string, unknown>): Post {
   return {
-    id: r.id,
-    userId: r.user_id || r.userId,
-    username: r.username,
-    title: r.title,
-    content: r.content,
-    createdAt: r.created_at || r.createdAt,
+    id: r.id as number,
+    userId: (r.user_id || r.userId) as number,
+    username: r.username as string,
+    title: r.title as string,
+    content: r.content as string,
+    createdAt: (r.created_at || r.createdAt) as string,
   };
 }
-function mapReply(r: any): Reply {
+function mapReply(r: Record<string, unknown>): Reply {
   return {
-    id: r.id,
-    postId: r.post_id || r.postId,
-    userId: r.user_id || r.userId,
-    username: r.username,
-    content: r.content,
-    createdAt: r.created_at || r.createdAt,
+    id: r.id as number,
+    postId: (r.post_id || r.postId) as number,
+    userId: (r.user_id || r.userId) as number,
+    username: r.username as string,
+    content: r.content as string,
+    createdAt: (r.created_at || r.createdAt) as string,
   };
 }
-function mapImage(r: any): Image {
+function mapImage(r: Record<string, unknown>): Image {
   return {
-    id: r.id,
-    userId: r.user_id || r.userId,
-    username: r.username,
-    sectionId: r.section_id || r.sectionId,
-    url: r.url,
-    description: r.description,
-    createdAt: r.created_at || r.createdAt,
+    id: r.id as number,
+    userId: (r.user_id || r.userId) as number,
+    username: r.username as string,
+    sectionId: (r.section_id || r.sectionId) as number,
+    url: r.url as string,
+    description: r.description as string,
+    createdAt: (r.created_at || r.createdAt) as string,
   };
 }
-function mapSection(r: any): ImageSection {
-  return { id: r.id, name: r.name, description: r.description };
+function mapSection(r: Record<string, unknown>): ImageSection {
+  return { id: r.id as number, name: r.name as string, description: r.description as string };
 }
 
-function mapCharacter(r: any): Character {
+function mapCharacter(r: Record<string, unknown>): Character {
   return {
-    id: r.id,
-    name: r.name,
-    nameJp: r.name_jp || r.nameJp,
-    alias: r.alias,
-    image: r.image,
-    intro: r.intro,
-    info: typeof r.info === "string" ? JSON.parse(r.info) : (r.info || {}),
-    sections: typeof r.sections === "string" ? JSON.parse(r.sections) : (r.sections || []),
-    trivias: typeof r.trivias === "string" ? JSON.parse(r.trivias) : (r.trivias || []),
+    id: r.id as string,
+    name: r.name as string,
+    nameJp: (r.name_jp || r.nameJp) as string,
+    alias: r.alias as string,
+    image: r.image as string,
+    intro: r.intro as string,
+    info: typeof r.info === "string" ? JSON.parse(r.info) : (r.info || {}) as Record<string, string>,
+    sections: typeof r.sections === "string" ? JSON.parse(r.sections) : (r.sections || []) as { title: string; content: string }[],
+    trivias: typeof r.trivias === "string" ? JSON.parse(r.trivias) : (r.trivias || []) as string[],
   };
 }
 export interface Arc {
@@ -519,16 +521,16 @@ export interface Arc {
   created_at: string;
 }
 
-function mapArc(r: any): Arc {
+function mapArc(r: Record<string, unknown>): Arc {
   return {
-    id: r.id,
-    name: r.name,
-    name_jp: r.name_jp || r.nameJp,
-    volume_start: r.volume_start || r.volumeStart,
-    volume_end: r.volume_end || r.volumeEnd,
-    summary: r.summary,
-    characters: typeof r.characters === "string" ? JSON.parse(r.characters) : (r.characters || []),
-    created_at: r.created_at || r.createdAt,
+    id: r.id as number,
+    name: r.name as string,
+    name_jp: (r.name_jp || r.nameJp) as string,
+    volume_start: (r.volume_start || r.volumeStart) as number,
+    volume_end: (r.volume_end || r.volumeEnd) as number,
+    summary: r.summary as string,
+    characters: typeof r.characters === "string" ? JSON.parse(r.characters) : (r.characters || []) as string[],
+    created_at: (r.created_at || r.createdAt) as string,
   };
 }
 
@@ -608,7 +610,7 @@ export const db = {
     update: async (id: number, data: Partial<User>) => {
       if (isSupabase()) {
         await initSupabase();
-        const updateData: any = {};
+        const updateData: Record<string, unknown> = {};
         if (data.banned !== undefined) updateData.banned = data.banned;
         if (data.password !== undefined) updateData.password = data.password;
         if (data.role !== undefined) updateData.role = data.role;
@@ -1057,6 +1059,47 @@ export const db = {
       initMemory();
       memoryCharacters = memoryCharacters.filter((c) => c.id !== id);
     },
+    update: async (id: string, data: Partial<Character>) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const updateData: Record<string, unknown> = {};
+        if (data.name !== undefined) updateData.name = data.name;
+        if (data.nameJp !== undefined) updateData.name_jp = data.nameJp;
+        if (data.alias !== undefined) updateData.alias = data.alias;
+        if (data.image !== undefined) updateData.image = data.image;
+        if (data.intro !== undefined) updateData.intro = data.intro;
+        if (data.info !== undefined) updateData.info = data.info;
+        if (data.sections !== undefined) updateData.sections = data.sections;
+        if (data.trivias !== undefined) updateData.trivias = data.trivias;
+        const { error } = await supabase!.from("characters").update(updateData).eq("id", id);
+        if (error) throw error;
+        return;
+      }
+      if (isPg()) {
+        await initPg();
+        const fields: string[] = [];
+        const values: unknown[] = [];
+        let idx = 1;
+        if (data.name !== undefined) { fields.push(`name = $${idx++}`); values.push(data.name); }
+        if (data.nameJp !== undefined) { fields.push(`name_jp = $${idx++}`); values.push(data.nameJp); }
+        if (data.alias !== undefined) { fields.push(`alias = $${idx++}`); values.push(data.alias); }
+        if (data.image !== undefined) { fields.push(`image = $${idx++}`); values.push(data.image); }
+        if (data.intro !== undefined) { fields.push(`intro = $${idx++}`); values.push(data.intro); }
+        if (data.info !== undefined) { fields.push(`info = $${idx++}`); values.push(JSON.stringify(data.info)); }
+        if (data.sections !== undefined) { fields.push(`sections = $${idx++}`); values.push(JSON.stringify(data.sections)); }
+        if (data.trivias !== undefined) { fields.push(`trivias = $${idx++}`); values.push(JSON.stringify(data.trivias)); }
+        if (fields.length === 0) return;
+        values.push(id);
+        await (await getSql())`UPDATE characters SET ${fields.join(", ")} WHERE id = ${values[values.length - 1]}`;
+        return;
+      }
+      initMemory();
+      const idx = memoryCharacters.findIndex((c) => c.id === id);
+      if (idx !== -1) {
+        memoryCharacters[idx] = { ...memoryCharacters[idx], ...data };
+      }
+      return;
+    },
   },
   arcs: {
     findAll: async () => {
@@ -1116,6 +1159,38 @@ export const db = {
       }
       return { ...data, id: 1, created_at: new Date().toISOString() } as Arc;
     },
+    update: async (id: number, data: Partial<Arc>) => {
+      if (isSupabase()) {
+        await initSupabase();
+        const updateData: Record<string, unknown> = {};
+        if (data.name !== undefined) updateData.name = data.name;
+        if (data.name_jp !== undefined) updateData.name_jp = data.name_jp;
+        if (data.volume_start !== undefined) updateData.volume_start = data.volume_start;
+        if (data.volume_end !== undefined) updateData.volume_end = data.volume_end;
+        if (data.summary !== undefined) updateData.summary = data.summary;
+        if (data.characters !== undefined) updateData.characters = data.characters;
+        const { error } = await supabase!.from("arcs").update(updateData).eq("id", id);
+        if (error) throw error;
+        return;
+      }
+      if (isPg()) {
+        await initPg();
+        const fields: string[] = [];
+        const values: unknown[] = [];
+        let idx = 1;
+        if (data.name !== undefined) { fields.push(`name = $${idx++}`); values.push(data.name); }
+        if (data.name_jp !== undefined) { fields.push(`name_jp = $${idx++}`); values.push(data.name_jp); }
+        if (data.volume_start !== undefined) { fields.push(`volume_start = $${idx++}`); values.push(data.volume_start); }
+        if (data.volume_end !== undefined) { fields.push(`volume_end = $${idx++}`); values.push(data.volume_end); }
+        if (data.summary !== undefined) { fields.push(`summary = $${idx++}`); values.push(data.summary); }
+        if (data.characters !== undefined) { fields.push(`characters = $${idx++}`); values.push(JSON.stringify(data.characters)); }
+        if (fields.length === 0) return;
+        values.push(id);
+        await (await getSql())`UPDATE arcs SET ${fields.join(", ")} WHERE id = ${values[values.length - 1]}`;
+        return;
+      }
+      return;
+    },
     delete: async (id: number) => {
       if (isSupabase()) {
         await initSupabase();
@@ -1136,12 +1211,12 @@ export const db = {
         await initSupabase();
         const { data, error } = await supabase!.from("arc_comments").select("*").eq("arc_id", arcId).order("created_at");
         if (error) throw error;
-        return (data || []).map((r: any) => ({ id: r.id, username: r.username, content: r.content, createdAt: r.created_at }));
+        return (data || []).map((r: Record<string, unknown>) => ({ id: r.id as number, username: r.username as string, content: r.content as string, createdAt: r.created_at as string }));
       }
       if (isPg()) {
         await initPg();
         const { rows } = await (await getSql())`SELECT * FROM arc_comments WHERE arc_id = ${arcId} ORDER BY created_at`;
-        return rows.map((r: any) => ({ id: r.id, username: r.username, content: r.content, createdAt: r.created_at }));
+        return rows.map((r: Record<string, unknown>) => ({ id: r.id as number, username: r.username as string, content: r.content as string, createdAt: r.created_at as string }));
       }
       return [];
     },
@@ -1213,3 +1288,4 @@ export const replySchema = z.object({
   postId: z.number().int(),
   content: z.string().min(1).max(1000),
 });
+

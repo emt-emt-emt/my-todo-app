@@ -34,7 +34,7 @@ export async function PATCH(req: NextRequest) {
     if (!payload) return NextResponse.json({ error: "无效Token" }, { status: 401 });
 
     const body = await req.json();
-    const updates: any = {};
+    const updates: Record<string, unknown> = {};
 
     if (body.avatar !== undefined) updates.avatar = body.avatar;
 

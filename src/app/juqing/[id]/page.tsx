@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { Header } from "../../../components/Header";
 import { useAuth } from "../../../components/AuthProvider";
@@ -34,7 +34,14 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editNameJp, setEditNameJp] = useState("");
+  const [editSummary, setEditSummary] = useState("");
+  const [editCharacters, setEditCharacters] = useState("");
+  const [saving, setSaving] = useState(false);
 
+  const isAdmin = user?.role === "admin";
   const arcId = Number(id);
 
   useEffect(() => {
@@ -65,6 +72,62 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
       }
     } catch {
       // ignore
+    }
+  }
+
+  function startEdit() {
+    if (!arc) return;
+    setEditName(arc.name);
+    setEditNameJp(arc.name_jp);
+    setEditSummary(arc.summary);
+    setEditCharacters(arc.characters?.join(", ") || "");
+    setEditing(true);
+  }
+
+  async function saveEdit() {
+    if (!arc) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/arcs", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: arc.id,
+          name: editName,
+          name_jp: editNameJp,
+          summary: editSummary,
+          characters: editCharacters.split(",").map((s) => s.trim()).filter(Boolean),
+        }),
+        credentials: "include",
+      });
+      if (res.ok) {
+        setEditing(false);
+        fetchArc();
+      } else {
+        alert("保存失败");
+      }
+    } catch {
+      alert("保存失败");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!arc) return;
+    if (!confirm("确定删除该剧情篇章？此操作不可撤销。")) return;
+    try {
+      const res = await fetch(`/api/admin/arcs?id=${arc.id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (res.ok) {
+        window.location.href = "/juqing";
+      } else {
+        alert("删除失败");
+      }
+    } catch {
+      alert("删除失败");
     }
   }
 
@@ -131,7 +194,6 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
           </Link>
         </div>
 
-        {/* 篇章详情 */}
         <div
           style={{
             background: "#fff",
@@ -141,34 +203,144 @@ export default function ArcDetailPage({ params }: ArcDetailPageProps) {
             border: "1px solid #eee",
           }}
         >
-          <h1 style={{ fontSize: 24, color: "#333", marginBottom: 8 }}>
-            {arc.name}
-          </h1>
-          <div style={{ fontSize: 14, color: "#999", marginBottom: 20 }}>
-            {arc.name_jp} | 小说卷数: {arc.volume_start} ~ {arc.volume_end}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <h1 style={{ fontSize: 24, color: "#333", marginBottom: 8 }}>
+              {arc.name}
+            </h1>
+            {isAdmin && (
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  onClick={() => editing ? setEditing(false) : startEdit()}
+                  style={{
+                    padding: "6px 16px",
+                    background: editing ? "#999" : "#598bd2",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 4,
+                    cursor: "pointer",
+                    fontSize: 14,
+                  }}
+                >
+                  {editing ? "取消" : "✏️ 编辑"}
+                </button>
+                {!editing && (
+                  <button
+                    onClick={handleDelete}
+                    style={{
+                      padding: "6px 16px",
+                      background: "#e74c3c",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      fontSize: 14,
+                    }}
+                  >
+                    🗑️ 删除
+                  </button>
+                )}
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: 15, lineHeight: 1.8, color: "#444", whiteSpace: "pre-wrap" }}>
-            {arc.summary}
-          </div>
-          <div style={{ marginTop: 20, display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {arc.characters?.map((c) => (
-              <span
-                key={c}
-                style={{
-                  fontSize: 12,
-                  padding: "4px 12px",
-                  background: "#f0f4fa",
-                  color: "#598bd2",
-                  borderRadius: 12,
-                }}
-              >
-                {c}
-              </span>
-            ))}
-          </div>
+
+          {editing ? (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 10 }}>
+                <div>
+                  <label>中文名</label>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                  />
+                </div>
+                <div>
+                  <label>日文名</label>
+                  <input
+                    type="text"
+                    value={editNameJp}
+                    onChange={(e) => setEditNameJp(e.target.value)}
+                    style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                  />
+                </div>
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <label>简介</label>
+                <textarea
+                  value={editSummary}
+                  onChange={(e) => setEditSummary(e.target.value)}
+                  rows={8}
+                  style={{ width: "100%", padding: 10, borderRadius: 4, border: "1px solid #ccc" }}
+                />
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <label>出场角色（逗号分隔）</label>
+                <input
+                  type="text"
+                  value={editCharacters}
+                  onChange={(e) => setEditCharacters(e.target.value)}
+                  style={{ width: "100%", padding: 6, borderRadius: 4, border: "1px solid #ccc" }}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  onClick={saveEdit}
+                  disabled={saving}
+                  style={{
+                    padding: "6px 16px",
+                    background: "#27ae60",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 4,
+                    cursor: saving ? "not-allowed" : "pointer",
+                  }}
+                >
+                  {saving ? "保存中..." : "💾 保存"}
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  style={{
+                    padding: "6px 16px",
+                    background: "#999",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 4,
+                    cursor: "pointer",
+                  }}
+                >
+                  取消
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div style={{ fontSize: 14, color: "#999", marginBottom: 20 }}>
+                {arc.name_jp} | 小说卷数: {arc.volume_start} ~ {arc.volume_end}
+              </div>
+              <div style={{ fontSize: 15, lineHeight: 1.8, color: "#444", whiteSpace: "pre-wrap" }}>
+                {arc.summary}
+              </div>
+              <div style={{ marginTop: 20, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {arc.characters?.map((c) => (
+                  <span
+                    key={c}
+                    style={{
+                      fontSize: 12,
+                      padding: "4px 12px",
+                      background: "#f0f4fa",
+                      color: "#598bd2",
+                      borderRadius: 12,
+                    }}
+                  >
+                    {c}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
-        {/* 讨论区 */}
         <div className="title">
           <h2>💬 讨论 ({comments.length})</h2>
         </div>
